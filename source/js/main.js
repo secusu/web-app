@@ -720,6 +720,7 @@ window.SECU = {
 
         this.checkLocation();
         this.checkCopy();
+        this.checkDownload();
         this.watchScroll();
     }
 };
