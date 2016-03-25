@@ -167,6 +167,10 @@ window.SECU = {
         this._data.app.set('copySupported', document.queryCommandSupported('copy'));
     },
 
+    checkDownload: function() {
+        this._data.app.set('downloadSupported', 'download' in document.createElement('a'));
+    },
+
     fixHeight: function(event, type) {
         var ractive = SECU._data.app,
             node = event ? event.node : document.getElementById(type + 'ContainerBody'),
@@ -302,6 +306,7 @@ window.SECU = {
                     formDisabled: false,
                     textCopied: false,
                     copySupported: true,
+                    downloadSupported: true,
 
                     showError: false,
                     errorMessages: [],
@@ -418,6 +423,15 @@ window.SECU = {
                     this.set('encryptRawFile', []);
                 } else {
                     this.find('#messageFile').click();
+                }
+            },
+
+            downloadFile: function(event) {
+
+                if (!this.get('downloadSupported')) {
+                    event.original.preventDefault();
+                    var win = window.open(event.node.href, '_blank');
+                    win.focus();
                 }
             },
 
