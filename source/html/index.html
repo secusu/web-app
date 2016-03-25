@@ -196,7 +196,7 @@
                 >
                 
                 <button
-                  class="{{formDisabled || feedbackSent ? '' : 'button-primary'}} {{formDisabled ? 'sending' : ''}} feedbackSendButton"
+                  class="{{formDisabled || feedbackSent ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} feedbackSendButton"
                   disabled="{{feedbackSent ? true : false}}"
                   on-tap="sendFeedback"
                   on-space="sendFeedback"
@@ -307,7 +307,7 @@
                 <p>You are about to load the container <strong>#{{decryptHash}}</strong>. It will be removed from our servers afterwards.</p>
                 
                 <button
-                  class="{{decryptLoaded || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'loading' : ''}} containerLoadButton"
+                  class="{{decryptLoaded || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} containerLoadButton"
                   on-tap="requestContainer:{{decryptHash}}"
                   on-space="requestContainer:{{decryptHash}}"
                   on-enter="requestContainer:{{decryptHash}}"
@@ -404,7 +404,7 @@
                     >
                     
                     <button
-                      class="{{encryptDone || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'creating' : ''}} containerCreateButton"
+                      class="{{encryptDone || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} containerCreateButton"
                       disabled="{{formDisabled ? true : false}}"
                       on-tap="createContainer"
                       on-enter="createContainer"

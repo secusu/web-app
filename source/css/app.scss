@@ -7,6 +7,7 @@ $colour-black: #040000;
 $colour-white: #fff;
 $colour-gray: #eee;
 $colour-dark-gray: #a9a9a9;
+$colour-davy-gray: #555;
 $colour-red: #ff7878;
 
 @keyframes loading{
@@ -125,32 +126,14 @@ a.logo{
     }
 }
 
-.feedbackSendButton{
-
-    &.sending{
-
-        &:after{
-            @include loading(10px, $colour-black);
-        }
-    }
-}
-
-.containerCreateButton{
-
-    &.creating{
-
-        &:after{
-            @include loading(10px, $colour-black);
-        }
-    }
-}
-
+.feedbackSendButton,
+.containerCreateButton,
 .containerLoadButton{
 
-    &.loading{
-        
+    &.processing{
+
         &:after{
-            @include loading(10px, $colour-black);
+            @include loading(10px, $colour-davy-gray);
         }
     }
 }
