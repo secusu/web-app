@@ -185,6 +185,22 @@ window.SECU = {
         }
     },
 
+    base64ToBlob: function(dataURI) {
+        var byteString = atob(dataURI.split(',')[1]),
+            mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0],
+            ab = new ArrayBuffer(byteString.length),
+            ia = new Uint8Array(ab);
+        
+        for (var i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+
+        var bb = new Blob([ab], {type: mimeString}),
+            blobUrl = URL.createObjectURL(bb);
+        
+        return blobUrl;
+    },
+
     fileToBase64: function(file) {
         var fileReader = new FileReader(),
             promise = new Promise(function(resolve, reject) {
@@ -492,7 +508,7 @@ window.SECU = {
                                 ractive.set('decryptForm.message', JSON.stringify(response.data.text));
                             }
                         } else {
-                            /* Old structure. Remove on April 26th */
+                            /* Old structure. Remove on April 27th */
 
                             if (response.data.hasOwnProperty('plaintext')) {
                                 ractive.set('decryptMessage', response.data.plaintext);
@@ -509,15 +525,16 @@ window.SECU = {
                         }
 
                         if (response.data.files && response.data.files[0]) {
+                            ractive.set('decryptFiles.0.name', response.data.files[0].name);
+                            ractive.set('decryptFiles.0.extension', _this.getFileExtension(response.data.files[0].name));
+                            
                             if (typeof response.data.files[0].data === 'string') {
                                 ractive.set('decryptDone', true);
-                                ractive.set('decryptFiles', response.data.files);
+                                ractive.set('decryptFiles.0.data', _this.base64ToBlob(response.data.files[0].data));
                             } else {
-                                ractive.set('decryptFiles.0.name', response.data.files[0].name);
                                 ractive.set('decryptFileForm.message', JSON.stringify(response.data.files[0].data));
                             }
                             
-                            ractive.set('decryptFiles.0.extension', _this.getFileExtension(response.data.files[0].name));
                         }
 
                         ractive.set('decryptLoaded', true);
@@ -658,7 +675,7 @@ window.SECU = {
 
                 if (this.get('decryptFileForm.message').length) {
                     try {
-                        this.set('decryptFiles.0.data', _this.decrypt(this.get('decryptFileForm')));
+                        this.set('decryptFiles.0.data', _this.base64ToBlob(_this.decrypt(this.get('decryptFileForm'))));
                     } catch(e) {
                         this.set('decryptSuccess', false);
                     }
