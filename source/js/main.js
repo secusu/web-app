@@ -159,6 +159,10 @@ window.SECU = {
         }
     },
 
+    getFileExtension: function(string) {
+        return string.split('.').pop();
+    },
+
     checkCopy: function() {
         this._data.app.set('copySupported', document.queryCommandSupported('copy'));
     },
@@ -248,11 +252,12 @@ window.SECU = {
         app.set('encryptLink', '');
         app.set('encryptFormActive', true);
         app.set('encryptLink', '');
-        app.set('encryptRawFile', '');
+        app.set('encryptRawFile', []);
 
         app.set('encryptFileData', {
             size: '',
-            name: ''
+            name: '',
+            extension: ''
         });
         app.set('encryptFile', {
             message: '',
@@ -310,10 +315,11 @@ window.SECU = {
                     encryptDone: false,
                     encryptFormActive: false,
                     encryptLink: '',
-                    encryptRawFile: '',
+                    encryptRawFile: [],
                     encryptFileData: {
                         size: '',
-                        name: ''
+                        name: '',
+                        extension: ''
                     },
                     encryptFile: {
                         message: '',
@@ -392,7 +398,11 @@ window.SECU = {
 
                 event.original.preventDefault();
 
-                this.find('#messageFile').click();
+                if (this.get('encryptRawFile').length) {
+                    this.set('encryptRawFile', []);
+                } else {
+                    this.find('#messageFile').click();
+                }
             },
 
             checkFile: function(event) {
@@ -402,17 +412,28 @@ window.SECU = {
                 _this.error.hide();
                 
                 if (!file) {
+                    this.set('encryptFileData', {
+                        name: '',
+                        size: '',
+                        extension: ''
+                    });
                     return;
                 }
 
                 if (file.size > data.params.maxFileSize) {
-                    this.set('encryptRawFile', null);
+                    this.set('encryptRawFile', []);
+                    this.set('encryptFileData', {
+                        name: file.name,
+                        size: size,
+                        extension: ext
+                    });
                     _this.error.show(['The file is too big']);
                     return;
                 }
 
                 var ractive = this,
-                    size = _this.prettifySize(file.size);
+                    size = _this.prettifySize(file.size),
+                    ext = _this.getFileExtension(file.name);
 
                 _this.fileToBase64(file).then(
                     
@@ -420,7 +441,8 @@ window.SECU = {
                         ractive.set('encryptFile.message', response);
                         ractive.set('encryptFileData', {
                             name: file.name,
-                            size: size
+                            size: size,
+                            extension: ext
                         });
                     },
                     
@@ -494,6 +516,8 @@ window.SECU = {
                                 ractive.set('decryptFiles.0.name', response.data.files[0].name);
                                 ractive.set('decryptFileForm.message', JSON.stringify(response.data.files[0].data));
                             }
+                            
+                            ractive.set('decryptFiles.0.extension', _this.getFileExtension(response.data.files[0].name));
                         }
 
                         ractive.set('decryptLoaded', true);
@@ -636,10 +660,6 @@ window.SECU = {
                     try {
                         this.set('decryptFiles.0.data', _this.decrypt(this.get('decryptFileForm')));
                     } catch(e) {
-                        this.set('decryptFiles', [{
-                            data: '',
-                            name: e.toString()
-                        }]);
                         this.set('decryptSuccess', false);
                     }
                 }

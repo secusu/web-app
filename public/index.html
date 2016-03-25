@@ -180,9 +180,12 @@
                         {{/decryptMessage}}
                         
                         {{#decryptFiles.length}}
+                          <label>File</label>
                           {{#decryptFiles}}
-                            <label>File</label>
-                            <p class="fileName">{{name}}</p>
+                            <div class="attachedFile active">
+                              <i class="file">{{extension}}</i>
+                              {{name}}
+                            </div>
                             <a
                               class="button button-primary"
                               target="_blank"
@@ -301,7 +304,7 @@
                       on-input="fixHeight:encrypt"
                     ></textarea>
                     
-                    <label for="messageFile">File</label>
+                    <label>File</label>
                     <input
                       id="messageFile"
                       type="file"
@@ -311,25 +314,17 @@
                       on-enter="uploadFile"
                       on-space="uploadFile"
                     >
-                    <input
-                      class="u-full-width fileNameInput"
-                      id="messageFileName"
-                      type="text"
-                      placeholder="not more than 1.5MB"
-                      value="{{encryptRawFile.length ? (encryptFileData.size + ' — ' + encryptFileData.name) : ''}}"
-                      disabled=true
-                      readonly=true
-                      on-tap="uploadFile"
-                      on-enter="uploadFile"
-                      on-space="uploadFile"
-                    >
+                    <div class="attachedFile {{encryptRawFile.length ? 'active' : ''}}">
+                      <i class="file">{{encryptRawFile.length ? encryptFileData.extension : '?'}}</i>
+                      {{encryptRawFile.length ? (encryptFileData.size + ' — ' + encryptFileData.name) : 'not more than 1.5MB'}}
+                    </div>
                     <button
                       class="{{formDisabled ? '' : 'button-primary'}}"
                       disabled="{{formDisabled ? true : false}}"
                       on-tap="uploadFile"
                       on-enter="uploadFile"
                       on-space="uploadFile"
-                    >Upload</button>
+                    >{{encryptRawFile.length ? 'Remove' : 'Attach'}}</button>
                     
                     <label for="messagePassword">Password</label>
                     <input
