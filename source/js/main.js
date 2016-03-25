@@ -421,6 +421,7 @@ window.SECU = {
 
                 if (this.get('encryptRawFile').length) {
                     this.set('encryptRawFile', []);
+                    this.find('#messageFile').value = '';
                 } else {
                     this.find('#messageFile').click();
                 }
