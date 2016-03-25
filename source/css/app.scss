@@ -1,0 +1,287 @@
+@import 'normalize';
+@import 'font';
+@import 'skeleton';
+
+$logo-height: 12rem;
+$colour-black: #040000;
+$colour-white: #fff;
+$colour-gray: #eee;
+$colour-red: #ff7878;
+
+@keyframes loading{
+    0%{
+        transform: rotateZ(0deg);
+    }
+    100%{
+        transform: rotateZ(360deg);
+    }
+}
+
+@mixin loading($size, $color) {
+    content: '';
+    width: #{$size};
+    height: #{$size};
+    border: 1px solid #{$color};
+    border-right-color: transparent;
+    margin-left: 1rem;
+    display: inline-block;
+    vertical-align: middle;
+    border-radius: 50%;
+    animation: loading 1s linear infinite;
+}
+
+h6{
+    text-transform: uppercase;
+    letter-spacing: .2rem;
+    font-weight: 600;
+}
+
+a.logo{
+    width: 100%;
+    height: $logo-height;
+    position: relative;
+    display: block;
+    text-align: center;
+
+    svg{
+        display: inline-block;
+        width: 100%;
+        height: 100%;
+
+        use{
+            transition: fill 200ms ease-in-out;
+        }
+    }
+
+    strong{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        line-height: $logo-height + 1rem;
+        color: $colour-black;
+        letter-spacing: 0.2rem;
+        text-transform: uppercase;
+        transition: color 200ms ease-in-out;
+    }
+
+    &.active,
+    &:hover{
+        
+        svg{
+            
+            use{
+                fill: $colour-black;
+            }
+        }
+
+        strong{
+            color: $colour-white;
+        }
+    }
+}
+
+.errorContainer{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: $colour-red;
+    color: $colour-white;
+
+    label{
+        margin-top: 2.5rem;
+    }
+
+    .columns{
+        max-width: 960px;
+        margin: 0 auto;
+        float: none;
+        padding: 0 20px;
+    }
+}
+
+.copyButton{
+
+    &:after{
+        content: ' copied';
+    }
+
+    &.button-primary{
+        
+        &:before{
+            content: 'Copy ';
+        }
+        
+        &:after{
+            content: '';
+        }
+    }
+
+    +.fileName{
+        margin-top: 0.5rem;
+    }
+}
+
+.feedbackSendButton{
+
+    &.sending{
+
+        &:after{
+            @include loading(10px, $colour-black);
+        }
+    }
+}
+
+.containerCreateButton{
+
+    &.creating{
+
+        &:after{
+            @include loading(10px, $colour-black);
+        }
+    }
+}
+
+.containerLoadButton{
+
+    &.loading{
+        
+        &:after{
+            @include loading(10px, $colour-black);
+        }
+    }
+}
+
+svg{
+    
+    use{
+        stroke-width: 1px;
+        stroke: $colour-black;
+        fill: transparent;
+    }
+}
+
+form{
+    
+    textarea{
+        resize: none;
+        display: block;
+    }
+
+    .fileNameInput{
+        text-overflow: ellipsis;
+    }
+
+    #messageFile{
+        display: none;
+    }
+
+    .fileName{
+        word-wrap: break-word;
+        margin-bottom: 1.5rem;
+    }
+
+    .createContainer{
+        margin-top: 1.5rem;
+    }
+
+    .decryptionFailed{
+        margin-bottom: 0;
+        
+        ~.createContainer{
+            margin-top: 0;
+        }
+    }
+}
+
+.navbar{
+    z-index: 1;
+    height: 7rem;
+    border-bottom: 1px solid $colour-gray;
+    margin-bottom: 2.5rem;
+    background-color: $colour-white;
+
+    &-spacer{
+        overflow: hidden;
+        height: 0;
+
+        &.docked{
+            height: 7rem;
+            border-bottom: 1px solid $colour-gray;
+            margin-bottom: 2.5rem;
+        }
+    }
+
+    &.docked{
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+
+        .columns{
+            max-width: 960px;
+            margin: 0 auto;
+            float: none;
+            padding: 0 20px;
+        }
+    }
+
+    ul{
+        list-style: none;
+        margin-bottom: 0;
+        
+        li{
+            float: left;
+            margin-bottom: 0;
+
+            &:not(:last-child){
+                margin-right: 2rem;
+            }
+
+            a{
+                position: relative;
+                display: block;
+                color: $colour-black;
+                text-transform: uppercase;
+                letter-spacing: .2rem;
+                font-weight: 600;
+                text-decoration: none;
+                line-height: 7rem;
+
+                &.active{
+                    &:after{
+                        content: '';
+                        width: 4px;
+                        height: 4px;
+                        position: absolute;
+                        bottom: 1.3rem;
+                        left: 50%;
+                        margin-left: -2px;
+                        background-color: $colour-black;
+                        border-radius: 50%;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (min-width: 400px) { 
+    .navbar.docked,
+    .errorContainer{
+        .columns{
+            width: 85%;
+            padding: 0;
+        }
+    }
+}
+
+@media (min-width: 550px) {
+    .navbar.docked,
+    .errorContainer{
+        .columns{
+            width: 80%;
+        }
+    }
+}
