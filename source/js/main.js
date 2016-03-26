@@ -122,6 +122,10 @@ window.SECU.App = {
                     event.original.preventDefault();
                 }
 
+                if (this.get('show.' + view)) {
+                    return false;
+                }
+
                 window.SECU.Error.hide();
 
                 var views = this.get('show');
