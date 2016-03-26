@@ -271,18 +271,24 @@ form{
                 font-weight: 600;
                 text-decoration: none;
                 line-height: 7rem;
+                outline: none;
+
+                &:after{
+                    content: '';
+                    width: 4px;
+                    height: 4px;
+                    position: absolute;
+                    bottom: 1.3rem;
+                    left: 50%;
+                    margin-left: -2px;
+                    background-color: transparent;
+                    border-radius: 50%;
+                    transition: background-color 100ms ease-in-out;
+                }
 
                 &.active{
                     &:after{
-                        content: '';
-                        width: 4px;
-                        height: 4px;
-                        position: absolute;
-                        bottom: 1.3rem;
-                        left: 50%;
-                        margin-left: -2px;
                         background-color: $colour-black;
-                        border-radius: 50%;
                     }
                 }
             }
