@@ -21,6 +21,11 @@ gulp.task('build-js', function() {
             'source/js/ractive.js',
             'source/js/ractive-events-tap.js',
             'source/js/ractive-events-keys.js',
+            'source/js/ajax.js',
+            'source/js/crypt.js',
+            'source/js/helpers.js',
+            'source/js/file.js',
+            'source/js/errors.js',
             'source/js/main.js'
         ])
         .pipe(closureCompiler({

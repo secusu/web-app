@@ -2,299 +2,85 @@
 
 Ractive.DEBUG = false;
 
-window.SECU = {
+window.SECU = window.SECU || {};
+
+window.SECU.App = {
 
     _data: {
 
         params: {
-            maxFileSize: 1572864
-        },
-
-        nav: {},
-        
-        url: {
-            
-            api: {
-                host: 'https://api.secu.su',
-                feedback: '/feedback',
-                post: '/s',
-                get: '/s/'
+            encrypt : {
+                done: false,
+                link: '',
+                formActive: true,
+                rawFile: [],
+                fileData: {
+                    size: '',
+                    name: '',
+                    extension: ''
+                },
+                file: {
+                    message: '',
+                    password: ''
+                },
+                form: {
+                    message: '',
+                    password: ''
+                },
+                textareaHeight: '0px'
             },
-            
-            web: {
-                host: 'https://secu.su',
-                page: '/'
-            }
-        },
-
-        encryptionParameters: {
-            iterations: 4096,
-            keySize: 256,
-            authenticationStrength: 128,
-            authenticatedData: 'SËCU',
-            cipherMode: 'gcm'
-        }
-    },
-
-    watchScroll: function() {
-
-        var data = this._data;
-
-        data.nav.bar = document.getElementsByClassName('navbar')[0];
-        data.nav.spacer = document.getElementsByClassName('navbar-spacer')[0];
-
-        function watch(event) {
-
-            if (document.body.scrollTop > data.nav.spacer.offsetTop) {
-                data.nav.bar.classList.add('docked');
-                data.nav.spacer.classList.add('docked');
-            } else {
-                data.nav.bar.classList.remove('docked');
-                data.nav.spacer.classList.remove('docked');
-            }
-        }
-
-        window.addEventListener('scroll', watch, false);
-    },
-
-    error: {
-        
-        show: function(messages) {
-
-            var _this = window.SECU,
-                data = _this._data,
-                ractive = data.app;
-
-            ractive.set('errorMessages', messages);
-            ractive.set('showError', true);
-
-            clearTimeout(data.errorTimeout);
-
-            data.errorTimeout = setTimeout(function() {
-                _this.error.hide();
-            }, 3000);
-        },
-
-        hide: function() {
-
-            var _this = window.SECU,
-                data = _this._data,
-                ractive = data.app;
-
-            ractive.set('showError', false);
-            clearTimeout(data.errorTimeout);
-        }
-    },
-
-    ajax: function(obj) {
-
-        var promise = new Promise(function(resolve, reject) {
-
-            var client = new XMLHttpRequest();
-            client.open(obj.method, obj.url, true);
-            /*if (obj.isImage) {
-                client.responseType = 'blob';
-            }*/
-            if (obj.contentType) {
-                client.setRequestHeader("Content-type", obj.contentType);
-            }
-            
-            client.send(obj.data);
-
-            client.onload = function() {
-                if (this.status >= 200 && this.status < 300) {
-                    resolve(this.response);
-                } else {
-                    reject(this.statusText);
-                }
-            };
-        
-            client.onerror = function() {
-                reject(this.statusText);
-            };
-        });
-
-        return promise;
-    },
-
-    getRandomHexValue: function(words, paranoia) {
-        
-        return sjcl.random.randomWords(words, paranoia);
-    },
-
-    decrypt: function(user) {
-
-        var enc = this._data.encryptionParameters,
-            result = {},
-            decryptedContainter = sjcl.decrypt(user.password, user.message, {}, result);
-
-        return decryptedContainter;
-    },
-
-    encrypt: function(user) {
-
-        var enc = this._data.encryptionParameters,
-            result = {},
-            params = {
-                adata: enc.authenticatedData + '-' + new Date().getTime(),
-                iter: enc.iterations,
-                mode: enc.cipherMode,
-                ts: enc.authenticationStrength,
-                ks: enc.keySize,
-                iv: this.getRandomHexValue(4,0),
-                salt: this.getRandomHexValue(2,0)
+            decrypt: {
+                done: false,
+                success: true,
+                hash: '',
+                loaded: false,
+                formActive: false,
+                message: '',
+                files: [],
+                fileForm: {
+                    message: '',
+                    password: ''
+                },
+                form: {
+                    message: '',
+                    password: ''
+                },
+                textareaHeight: '0px'
             },
-            encryptedContainter = sjcl.encrypt(user.password, user.message, params, result);
-
-        return encryptedContainter;
+            feedback: {
+                sent: false,
+                form: {
+                    body: '',
+                    email: ''
+                },
+                textareaHeight: '0px'
+            }
+        }
     },
 
-    checkLocation: function() {
-        
+    reinitApp: function(reset) {
+
         var data = this._data,
-            id = window.location.pathname.substring(1);
-        
-        if (id.length) {
-            data.app.set('decryptHash', id);
+            app = data.app;
+
+        if (reset) {
+            window.SECU.Error.hide();
+            history.replaceState({}, 'Sëcu', '/');
         }
-    },
-
-    getFileExtension: function(string) {
-        return string.split('.').pop();
-    },
-
-    checkCopy: function() {
-        this._data.app.set('copySupported', document.queryCommandSupported('copy'));
-    },
-
-    checkDownload: function() {
-        this._data.app.set('downloadSupported', 'download' in document.createElement('a'));
-    },
-
-    fixHeight: function(event, type) {
-        var ractive = SECU._data.app,
-            node = event ? event.node : document.getElementById(type + 'ContainerBody'),
-            borderWidth = getComputedStyle(node).getPropertyValue('border-width');
-
-        if (borderWidth.length) {
-            borderWidth = parseInt(borderWidth, 10);
-        } else {
-            borderWidth = 1;
-        }
-
-        ractive.set(type + 'TextareaHeight', '0px');
-
-        if (node.scrollHeight > node.offsetHeight) {
-            ractive.set(type + 'TextareaHeight', (node.scrollHeight + borderWidth*2) + 'px');
-        }
-    },
-
-    base64ToBlob: function(dataURI) {
-        var byteString = atob(dataURI.split(',')[1]),
-            mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0],
-            ab = new ArrayBuffer(byteString.length),
-            ia = new Uint8Array(ab);
-        
-        for (var i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-
-        var bb = new Blob([ab], {type: mimeString}),
-            blobUrl = URL.createObjectURL(bb);
-        
-        return blobUrl;
-    },
-
-    fileToBase64: function(file) {
-        var fileReader = new FileReader(),
-            promise = new Promise(function(resolve, reject) {
-
-                try{
-                    fileReader.onload = function(event) {
-                        resolve(event.target.result);
-                    };
-
-                    fileReader.readAsDataURL(file);
-                } catch(e) {
-                    reject(e);
-                }
-        });
-
-        return promise;
-    },
-
-    prettifySize: function(size) {
-        size = Math.round(size/1000);
-
-        if (size >= 1000) {
-            size = (size/1000).toFixed(1) + 'MB'
-        } else {
-            size += 'KB'
-        }
-
-        return size;
-    },
-
-    resetApp: function() {
-
-        var app = this._data.app;
-
-        this.error.hide();
-
-        history.replaceState({}, 'Sëcu', '/');
-                
-        app.set('encryptForm', {
-            message: '',
-            file: '',
-            password: ''
-        });
 
         app.set('formDisabled', false);
         app.set('textCopied', false);
         
-        app.set('decryptDone', false);
-        app.set('decryptSuccess', true);
-        app.set('decryptHash', '');
-        app.set('decryptLoaded', false);
-        app.set('decryptFormActive', false);
-        app.set('decryptMessage', '');
-        app.set('decryptFiles', []);
-        app.set('decryptFileForm', {
-            message: '',
-            password: ''
-        });
-        app.set('decryptForm', {
-            message: '',
-            password: ''
-        });
-
-        app.set('encryptDone', false);
-        app.set('encryptLink', '');
-        app.set('encryptFormActive', true);
-        app.set('encryptLink', '');
-        app.set('encryptRawFile', []);
-
-        app.set('encryptFileData', {
-            size: '',
-            name: '',
-            extension: ''
-        });
-        app.set('encryptFile', {
-            message: '',
-            password: ''
-        });
-        app.set('encryptForm', {
-            message: '',
-            password: ''
-        });
+        app.set('decrypt', JSON.parse(JSON.stringify(data.params.decrypt)));
+        app.set('encrypt', JSON.parse(JSON.stringify(data.params.encrypt)));
+        app.set('feedback', JSON.parse(JSON.stringify(data.params.feedback)));
     },
 
     init: function() {
 
         var _this = this,
-            data = this._data;
-            
-        data.app = new Ractive({
+            data = this._data,
+            app = new Ractive({
                 el: document.getElementsByClassName('secuApp')[0],
                 template: '#secuApp',
                 data: {
@@ -303,67 +89,40 @@ window.SECU = {
                         faq: false,
                         feedback: false
                     },
+                    
                     formDisabled: false,
                     textCopied: false,
-                    copySupported: true,
-                    downloadSupported: true,
-
-                    showError: false,
-                    errorMessages: [],
-
-                    feedbackSent: false,
-                    feedbackForm: {
-                        body: '',
-                        email: ''
+                    
+                    supportedFeatures: {
+                        copy: true,
+                        download: true
                     },
-
-                    decryptHash: '',
-                    decryptDone: false,
-                    decryptSuccess: true,
-                    decryptLoaded: false,
-                    decryptFormActive: false,
-                    decryptMessage: '',
-                    decryptFiles: [],
-                    decryptFileForm: {
-                        message: '',
-                        password: ''
-                    },
-                    decryptForm: {
-                        message: '',
-                        password: ''
-                    },
-
-                    encryptDone: false,
-                    encryptFormActive: false,
-                    encryptLink: '',
-                    encryptRawFile: [],
-                    encryptFileData: {
-                        size: '',
-                        name: '',
-                        extension: ''
-                    },
-                    encryptFile: {
-                        message: '',
-                        password: ''
-                    },
-                    encryptForm: {
-                        message: '',
-                        password: ''
+                    
+                    errors: {
+                        show: false,
+                        messages: []
                     }
                 }
             });
 
-        data.app.on({
+        data.app = app;
+
+        this.reinitApp();
+        app.set('encrypt.formActive', false);
+
+        app.on({
 
             hideError: function() {
-                _this.error.hide();
+                window.SECU.Error.hide();
             },
 
             toggleView: function(event, view) {
-                
-                event.original.preventDefault();
 
-                _this.error.hide();
+                if (event.original) {
+                    event.original.preventDefault();
+                }
+
+                window.SECU.Error.hide();
 
                 var views = this.get('show');
 
@@ -376,31 +135,29 @@ window.SECU = {
 
             sendFeedback: function(event) {
 
-                event.original.preventDefault();
-
-                _this.error.hide();
-
-                if (!this.get('feedbackForm.body').length) {
-                    _this.error.show(["The message can't be empty"]);
-                    return;
+                if (event.original) {
+                    event.original.preventDefault();
                 }
 
-                var ractive = this;
+                var form = this.get('feedback.form'),
+                    ractive = this;
 
-                this.set('formDisabled', true);
-                
-                SECU.ajax({
-                    method: 'POST',
-                    contentType: 'application/json;charset=UTF-8',
-                    data: JSON.stringify(this.get('feedbackForm')),
-                    url: data.url.api.host + data.url.api.feedback
-                }).then(
-                    
+                window.SECU.Error.hide();
+
+                if (!form.body.length) {
+                    window.SECU.Error.show(["The message can't be empty"]);
+                    return false;
+                }
+
+                ractive.set('formDisabled', true);
+
+                window.SECU.Ajax.sendFeedback(form).then(
+            
                     function(response) {
 
-                        ractive.set('feedbackSent', true);
+                        ractive.set('feedback.sent', true);
                         ractive.set('formDisabled', false);
-                        ractive.set('feedbackForm', {
+                        ractive.set('feedback.form', {
                             body: '',
                             email: ''
                         });
@@ -408,19 +165,21 @@ window.SECU = {
                     
                     function(error) {
                         
-                        _this.error.show([error]);
+                        window.SECU.Error.show([error]);
                     }
                 );
             },
 
-            fixHeight: _this.fixHeight,
+            fixHeight: window.SECU.Helpers.fixHeight,
 
-            uploadFile: function(event) {
+            attachFile: function(event) {
 
-                event.original.preventDefault();
+                if (event.original) {
+                    event.original.preventDefault();
+                }
 
-                if (this.get('encryptRawFile').length) {
-                    this.set('encryptRawFile', []);
+                if (this.get('encrypt.rawFile').length) {
+                    this.set('encrypt.rawFile', []);
                     this.find('#messageFile').value = '';
                 } else {
                     this.find('#messageFile').click();
@@ -429,137 +188,139 @@ window.SECU = {
 
             downloadFile: function(event) {
 
-                if (!this.get('downloadSupported')) {
-                    event.original.preventDefault();
+                if (!this.get('supportedFeatures.download')) {
+                    if (event.original) {
+                        event.original.preventDefault();
+                    }
+                    
                     var win = window.open(event.node.href, '_blank');
                     win.focus();
                 }
             },
 
             checkFile: function(event) {
-                
-                var file = this.get('encryptRawFile.0');
 
-                _this.error.hide();
+                window.SECU.Error.hide();
+
+                var ractive = this,
+                    file = window.SECU.File.validated(this.get('encrypt.rawFile'));
                 
-                if (!file) {
-                    this.set('encryptFileData', {
+                if (file && !file[0]) {
+
+                    var size = window.SECU.File.prettifySize(file.size),
+                        ext = window.SECU.File.getExtension(file.name);
+
+                    window.SECU.File.fileToBase64(file).then(
+
+                        function(response) {
+                            ractive.set('encrypt.file.message', response);
+                            ractive.set('encrypt.fileData', {
+                                name: file.name,
+                                size: size,
+                                extension: ext
+                            });
+                        },
+                        
+                        function(error) {
+
+                            window.SECU.Error.show([error]);
+                        }
+                    );
+
+                } else {
+                    this.set('encrypt.fileData', {
                         name: '',
                         size: '',
                         extension: ''
                     });
-                    return;
-                }
 
-                if (file.size > data.params.maxFileSize) {
-                    this.set('encryptRawFile', []);
-                    this.set('encryptFileData', {
-                        name: file.name,
-                        size: size,
-                        extension: ext
-                    });
-                    _this.error.show(['The file is too big']);
-                    return;
-                }
-
-                var ractive = this,
-                    size = _this.prettifySize(file.size),
-                    ext = _this.getFileExtension(file.name);
-
-                _this.fileToBase64(file).then(
-                    
-                    function(response) {
-                        ractive.set('encryptFile.message', response);
-                        ractive.set('encryptFileData', {
-                            name: file.name,
-                            size: size,
-                            extension: ext
-                        });
-                    },
-                    
-                    function(error) {
-
-                        _this.error.show([error]);
+                    if (file[0]) {
+                        this.set('encrypt.rawFile', []);
+                        window.SECU.Error.show(['The file is too big']);
                     }
-                );
+                }
             },
             
-            resetApp: function(event) {
+            resetApp: function(event, reset) {
                 
-                event.original.preventDefault();
+                if (event.original) {
+                    event.original.preventDefault();
+                }
 
-                _this.resetApp();
+                _this.reinitApp(reset);
             },
 
             requestContainer: function(event, id) {
 
-                event.original.preventDefault();
+                if (event.original) {
+                    event.original.preventDefault();
+                }
 
-                var ractive = this;
+                var ractive = this,
+                    file = null;
 
-                this.set('formDisabled', true);
+                ractive.set('formDisabled', true);
 
-                SECU.ajax({
-                    method: 'GET',
-                    url: data.url.api.host + data.url.api.get + id
-                }).then(
-                    
+                window.SECU.Ajax.requestContainer(id).then(
+            
                     function(response) {
 
                         response = JSON.parse(response);
 
-                        if (response.data.hasOwnProperty('text')) {
+                        if (!response.data.hasOwnProperty('text')) {
                             
-                            if (typeof response.data.text === 'string') {
-                                ractive.set('decryptMessage', response.data.text);
-                                ractive.set('decryptDone', true);
-
-                                if (response.data.text.length) {
-                                    setTimeout(function() {
-                                        _this.fixHeight(null, 'decrypt');
-                                    }, 0);
-                                }
-                            } else {
-                                ractive.set('decryptForm.message', JSON.stringify(response.data.text));
-                            }
-                        } else {
                             /* Old structure. Remove on April 27th */
 
                             if (response.data.hasOwnProperty('plaintext')) {
-                                ractive.set('decryptMessage', response.data.plaintext);
-                                ractive.set('decryptDone', true);
+                                ractive.set('decrypt.message', response.data.plaintext);
+                                ractive.set('decrypt.done', true);
 
-                                if (response.data.plaintext.lebgth) {
+                                if (response.data.plaintext.length) {
                                     setTimeout(function() {
-                                        _this.fixHeight(null, 'decrypt');
+                                        window.SECU.Helpers.fixHeight(null, 'decrypt');
                                     }, 0);
                                 }
                             } else {
-                                ractive.set('decryptForm.message', JSON.stringify(response.data));
+                                ractive.set('decrypt.form.message', JSON.stringify(response.data));
+                            }
+                        } else {
+                            if (typeof response.data.text === 'string') {
+                                ractive.set('decrypt.message', response.data.text);
+                                ractive.set('decrypt.done', true);
+
+                                if (response.data.text.length) {
+                                    setTimeout(function() {
+                                        window.SECU.Helpers.fixHeight(null, 'decrypt');
+                                    }, 0);
+                                }
+                            } else {
+                                ractive.set('decrypt.form.message', JSON.stringify(response.data.text));
                             }
                         }
 
                         if (response.data.files && response.data.files[0]) {
-                            ractive.set('decryptFiles.0.name', response.data.files[0].name);
-                            ractive.set('decryptFiles.0.extension', _this.getFileExtension(response.data.files[0].name));
+                            file = response.data.files[0];
                             
-                            if (typeof response.data.files[0].data === 'string') {
-                                ractive.set('decryptDone', true);
-                                ractive.set('decryptFiles.0.data', _this.base64ToBlob(response.data.files[0].data));
+                            ractive.set('decrypt.files.0.name', file.name);
+                            ractive.set('decrypt.files.0.extension', window.SECU.File.getExtension(file.name));
+                            
+                            if (typeof file.data === 'string') {
+                                ractive.set('decrypt.done', true);
+                                ractive.set('decrypt.files.0.data', window.SECU.File.base64ToBlob(file.data));
                             } else {
-                                ractive.set('decryptFileForm.message', JSON.stringify(response.data.files[0].data));
+                                ractive.set('decrypt.fileForm.message', JSON.stringify(file.data));
                             }
                             
                         }
 
-                        ractive.set('decryptLoaded', true);
-                        ractive.set('decryptFormActive', true);
+                        ractive.set('decrypt.loaded', true);
+                        ractive.set('decrypt.formActive', true);
                         ractive.set('formDisabled', false);
                     },
                     
                     function(error) {
                         
-                        _this.error.show([error]);
+                        window.SECU.Error.show([error]);
                     }
                 );
             },
@@ -571,15 +332,14 @@ window.SECU = {
 
             copyText: function(event, id) {
 
-                event.original.preventDefault();
+                if (event.original) {
+                    event.original.preventDefault();
+                }
                 
-                var ractive = this,
-                    input = document.getElementById(id);
+                var ractive = this;
 
-                input.select();
-                document.execCommand('copy');
-                input.blur();
-                window.getSelection().removeAllRanges();
+                window.SECU.Helpers.copyText(document.getElementById(id));
+
                 this.set('textCopied', true);
 
                 setTimeout(function() {
@@ -589,66 +349,58 @@ window.SECU = {
             
             createContainer: function(event) {
 
-                event.original.preventDefault();
+                if (event.original) {
+                    event.original.preventDefault();
+                }
 
-                _this.error.hide();
+                window.SECU.Error.hide();
 
-                if (!this.get('encryptForm.message').length && !this.get('encryptRawFile').length) {
-                    _this.error.show(["There should be either message or file"]);
-                    return;
+                if (!this.get('encrypt.form.message').length && !this.get('encrypt.rawFile').length) {
+                    window.SECU.Error.show(["There should be either message or file"]);
+                    return false;
                 }
 
                 this.set('formDisabled', true);
 
                 var ractive = this,
-                    password = this.get('encryptForm.password'),
+                    password = this.get('encrypt.form.password'),
                     container = '',
                     files = [];
 
                 if (!password.length) {
-                    container = this.get('encryptForm.message');
+                    container = this.get('encrypt.form.message');
                 } else {
-                    container = JSON.parse(_this.encrypt(this.get('encryptForm')));
+                    container = JSON.parse(window.SECU.Crypt.encrypt(this.get('encrypt.form')));
                 }
 
-                if (this.get('encryptRawFile').length) {
+                if (this.get('encrypt.rawFile').length) {
                     
                     if (!password.length) {
                         
                         files.push({
-                            data: this.get('encryptFile.message'),
-                            name: this.get('encryptFileData.name')
+                            data: this.get('encrypt.file.message'),
+                            name: this.get('encrypt.fileData.name')
                         });
                     } else {
                         
-                        this.set('encryptFile.password', password);
+                        this.set('encrypt.file.password', password);
                         
                         files.push({
-                            data: JSON.parse(_this.encrypt(this.get('encryptFile'))),
-                            name: this.get('encryptFileData.name')
+                            data: JSON.parse(window.SECU.Crypt.encrypt(this.get('encrypt.file'))),
+                            name: this.get('encrypt.fileData.name')
                         });
                     }
                 }
 
-                SECU.ajax({
-                    method: 'POST',
-                    contentType: 'application/json;charset=UTF-8',
-                    data: JSON.stringify({
-                        data: {
-                            text: container,
-                            files: files
-                        }
-                    }),
-                    url: data.url.api.host + data.url.api.post
-                }).then(
+                window.SECU.Ajax.sendContainer({data: {text: container, files: files}}).then(
                     
                     function(response) {
                         
                         response = JSON.parse(response);
 
-                        ractive.set('encryptLink', data.url.web.host + data.url.web.page + response.hash);
-                        ractive.set('encryptFormActive', false);
-                        ractive.set('encryptDone', true);
+                        ractive.set('encrypt.link', window.SECU.Ajax._data.url.web.host + window.SECU.Ajax._data.url.web.page + response.hash);
+                        ractive.set('encrypt.formActive', false);
+                        ractive.set('encrypt.done', true);
                         ractive.set('formDisabled', false);
 
                         setTimeout(function() {
@@ -658,59 +410,61 @@ window.SECU = {
                     
                     function(error) {
                         
-                        _this.error.show([error]);
+                        window.SECU.Error.show([error]);
                     }
                 );
             },
 
             decryptContainer: function(event) {
 
-                event.original.preventDefault();
-
-                _this.error.hide();
-
-                if (!this.get('decryptForm.password').length) {
-                    _this.error.show(['You have to provide a password']);
-                    return;
+                if (event.original) {
+                    event.original.preventDefault();
                 }
 
-                var password = this.get('decryptForm.password');
+                window.SECU.Error.hide();
+
+                if (!this.get('decrypt.form.password').length) {
+                    window.SECU.Error.show(['You must provide a password']);
+                    return false;
+                }
+
+                var password = this.get('decrypt.form.password');
 
                 this.set('formDisabled', true);
-                this.set('decryptFileForm.password', password);
+                this.set('decrypt.fileForm.password', password);
 
-                if (this.get('decryptForm.message').length) {
+                if (this.get('decrypt.form.message').length) {
                     try {
-                        this.set('decryptMessage', _this.decrypt(this.get('decryptForm')));
+                        this.set('decrypt.message', window.SECU.Crypt.decrypt(this.get('decrypt.form')));
                     } catch(e) {
-                        this.set('decryptMessage', e.toString());
-                        this.set('decryptSuccess', false);
+                        this.set('decrypt.success', false);
                     }
                 }
 
-                if (this.get('decryptFileForm.message').length) {
+                if (this.get('decrypt.fileForm.message').length) {
                     try {
-                        this.set('decryptFiles.0.data', _this.base64ToBlob(_this.decrypt(this.get('decryptFileForm'))));
+                        this.set('decrypt.files.0.data', window.SECU.File.base64ToBlob(window.SECU.Crypt.decrypt(this.get('decrypt.fileForm'))));
                     } catch(e) {
-                        this.set('decryptSuccess', false);
+                        this.set('decrypt.success', false);
                     }
                 }
 
-                this.set('decryptFileForm', {
+                this.set('decrypt.fileForm', {
                     message: '',
                     password: ''
                 });
-                this.set('decryptForm', {
+                
+                this.set('decrypt.form', {
                     message: '',
                     password: ''
                 });
 
-                this.set('decryptDone', true);
+                this.set('decrypt.done', true);
                 this.set('formDisabled', false);
 
-                if (this.get('decryptSuccess') && this.get('decryptMessage').length) {
+                if (this.get('decrypt.success') && this.get('decrypt.message').length) {
                     setTimeout(function() {
-                        _this.fixHeight(null, 'decrypt');
+                        window.SECU.Helpers.fixHeight(null, 'decrypt');
                         setTimeout(function() {
                             document.getElementById('decryptContainerBody').select();
                         }, 0);
@@ -719,11 +473,11 @@ window.SECU = {
             }
         });
 
-        this.checkLocation();
-        this.checkCopy();
-        this.checkDownload();
-        this.watchScroll();
+        window.SECU.Helpers.checkLocation();
+        window.SECU.Helpers.checkCopy();
+        window.SECU.Helpers.checkDownload();
+        window.SECU.Helpers.watchScroll();
     }
 };
 
-window.SECU.init();
+window.SECU.App.init();

@@ -183,22 +183,24 @@ form{
         padding-top: 0.7rem;
         box-sizing: border-box;
         color: $colour-dark-gray;
+        word-break: break-all;
         
         i{
             &.file{
                 display: inline-block;
-                width: 24px;
-                height: 32px;
-                border: 3px solid $colour-gray;
-                border-radius: 5px;
+                width: 30px;
+                height: 38px;
+                box-shadow: inset 0 0 0 3px $colour-gray;
+                border-radius: 4px;
                 position: absolute;
                 top: 0;
                 left: 0;
                 overflow: hidden;
                 font-size: 1.1rem;
                 font-style: normal;
-                line-height: 32px;
+                line-height: 38px;
                 text-align: center;
+                transition: background-color 200ms ease-in-out, box-shadow 200ms ease-in-out;
             }
         }
 
@@ -208,8 +210,8 @@ form{
             i{
                 &.file{
                     color: $colour-white;
-                    border-color: $colour-black;
-                    background-color: $colour-black;
+                    box-shadow: inset 0 0 0 3px $colour-davy-gray;
+                    background-color: $colour-davy-gray;
                 }
             }
         }
@@ -286,6 +288,11 @@ form{
             }
         }
     }
+}
+
+button,
+.button{
+    transition: background-color 100ms ease-in-out, color 100ms ease-in-out, border-color 100ms ease-in-out;
 }
 
 @media (min-width: 400px) { 
