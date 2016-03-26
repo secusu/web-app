@@ -32,6 +32,11 @@ $colour-red: #ff7878;
     animation: loading 1s linear infinite;
 }
 
+body,
+html{
+    background-color: $colour-white;
+}
+
 h6{
     text-transform: uppercase;
     letter-spacing: .2rem;
