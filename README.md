@@ -2,7 +2,7 @@
 
 [![Gitter chat](https://badges.gitter.im/secusu/secusu.svg)](https://gitter.im/secusu/secusu)
 
-Sёcu is a web application design to create, store and provide [Sёcu API](secusu/secusu) self-destructing data payloads.
+Sёcu is a web application design to create, store and provide [Sёcu API](https://github.com/secusu/secusu) self-destructing data payloads.
 
 <p align="center">
 <img src="https://cloud.githubusercontent.com/assets/1849174/14016031/cbd32b58-f1d6-11e5-9a18-864e660b9af5.png">
