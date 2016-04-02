@@ -153,6 +153,7 @@ svg{
 }
 
 form{
+    position: relative;
     
     textarea{
         resize: none;
@@ -189,9 +190,11 @@ form{
         box-sizing: border-box;
         color: $colour-dark-gray;
         word-break: break-all;
+        position: relative;
         
-        i{
+        i{  
             &.file{
+                pointer-events: none;
                 display: inline-block;
                 width: 30px;
                 height: 38px;
@@ -201,6 +204,8 @@ form{
                 top: 0;
                 left: 0;
                 overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
                 font-size: 1.1rem;
                 font-style: normal;
                 line-height: 38px;
@@ -218,6 +223,23 @@ form{
                     box-shadow: inset 0 0 0 3px $colour-davy-gray;
                     background-color: $colour-davy-gray;
                 }
+            }
+        }
+
+        .drop{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: $colour-white;
+            border-style: dashed;
+            opacity: 0.6;
+            pointer-events: none;
+            display: none;
+
+            &.active{
+                display: block;
             }
         }
     }

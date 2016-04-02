@@ -317,7 +317,7 @@
           {{/decrypt.hash}}
 
           {{^decrypt.hash.length}}
-            <div class="twelve columns">
+            <div class="twelve columns" on-dragndrop="dragDrop">
 
               {{#encrypt}}
                 {{#done}}
@@ -380,6 +380,7 @@
                         <div class="attachedFile {{rawFile.length ? 'active' : ''}}">
                           <i class="file">{{rawFile.length ? extension : '?'}}</i>
                           {{rawFile.length ? (size + ' — ' + name) : 'not more than 1.5MB'}}
+                          <div class="button drop {{dropActive ? 'active' : ''}}">Drop file here</div>
                         </div>
                       {{/fileData}}
                       <button

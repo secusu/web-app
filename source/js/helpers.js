@@ -46,6 +46,11 @@ window.SECU.Helpers = {
         window.SECU.App._data.app.set('supportedFeatures.download', 'download' in document.createElement('a'));
     },
 
+    checkDragDrop: function() {
+        var div = document.createElement('div');
+        window.SECU.App._data.app.set('supportedFeatures.dragdrop', 'ondragstart' in div && 'ondrop' in div);
+    },
+
     fixHeight: function(event, type) {
         var ractive = window.SECU.App._data.app,
             node = event ? event.node : document.getElementById(type + 'ContainerBody'),
