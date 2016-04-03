@@ -29,6 +29,50 @@ window.SECU.Helpers = {
         window.addEventListener('scroll', watch, false);
     },
 
+    watchDragDrop: function() {
+
+        var ractive = window.SECU.App._data.app,
+            data = this._data;
+
+        if (!ractive.get('supportedFeatures.dragdrop')) {
+            return;
+        }
+
+        function dragdrop(event) {
+            
+            event.preventDefault();
+
+            clearTimeout(data.dropTimeout);
+
+            switch(event.type) {
+                case 'dragenter':
+                case 'dragover':
+                    ractive.set('dropActive', true);
+                    data.dropTimeout = setTimeout(function() {
+                        ractive.set('dropActive', false);
+                    }, 1000);
+                    break;
+                case 'dragleave':
+                    data.dropTimeout = setTimeout(function() {
+                        ractive.set('dropActive', false);
+                    }, 1000);
+                    break;
+                case 'drop':
+                    ractive.set('dropActive', false);
+                    if (document.getElementsByClassName('attachedFile').length) {
+                        ractive.set('encrypt.rawFile', [event.dataTransfer.files[0]]);
+                        ractive.fire('checkFile');
+                    }
+                    break;
+            }
+        }
+
+        document.body.addEventListener('dragover', dragdrop, false);
+        document.body.addEventListener('dragenter', dragdrop, false);
+        document.body.addEventListener('dragleave', dragdrop, false);
+        document.body.addEventListener('drop', dragdrop, false);
+    },
+
     checkLocation: function() {
         
         var id = window.location.pathname.substring(1);
