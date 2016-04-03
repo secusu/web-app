@@ -353,40 +353,6 @@ window.SECU.App = {
                     ractive.set('textCopied', false);
                 }, 1000);
             },
-
-            dragDrop: function(event) {
-
-                if (!this.get('supportedFeatures.dragdrop')) {
-                    return;
-                }
-
-                var ractive = this,
-                    data = _this._data,
-                    type = event.type;
-
-                if (event.original) {
-                    event.original.preventDefault();
-                }
-
-                clearTimeout(data.dropTimeout);
-
-                switch(type) {
-                    case 'enter':
-                    case 'over':
-                        this.set('dropActive', true);
-                        data.dropTimeout = setTimeout(function() {
-                            ractive.set('dropActive', false);
-                        }, 1000);
-                        break;
-                    case 'drop':
-                        ractive.set('dropActive', false);
-                        if (event.target.classList.contains('attachedFile')) {
-                            ractive.set('encrypt.rawFile', [event.original.dataTransfer.files[0]]);
-                            ractive.fire('checkFile');
-                        }
-                        break;
-                }
-            },
             
             createContainer: function(event) {
 
@@ -518,6 +484,7 @@ window.SECU.App = {
         window.SECU.Helpers.checkCopy();
         window.SECU.Helpers.checkDownload();
         window.SECU.Helpers.checkDragDrop();
+        window.SECU.Helpers.watchDragDrop();
         window.SECU.Helpers.watchScroll();
     }
 };
