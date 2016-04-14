@@ -80,7 +80,8 @@ window.SECU.App = {
     refreshCount: function(number) {
 
         var data = this._data;
-        data.app.set('count', window.SECU.Helpers.formatCounter(number));
+        data.app.set('counter.number', window.SECU.Helpers.formatCounter(number));
+        data.app.set('counter.show', true);
     },
 
     requestCount: function() {
@@ -111,7 +112,10 @@ window.SECU.App = {
                 el: document.getElementsByClassName('secuApp')[0],
                 template: '#secuApp',
                 data: {
-                    count: 'A lot of',
+                    counter: {
+                        show: false,
+                        number: '9000'
+                    },
                     
                     show: {
                         main: true,
