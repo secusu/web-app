@@ -77,6 +77,32 @@ window.SECU.App = {
         app.set('feedback', JSON.parse(JSON.stringify(data.params.feedback)));
     },
 
+    refreshCount: function(number) {
+
+        var data = this._data;
+        data.app.set('count', window.SECU.Helpers.formatCounter(number));
+    },
+
+    requestCount: function() {
+
+        var _this = this,
+            data = this._data;
+
+        window.SECU.Ajax.getCount().then(
+
+            function(response) {
+
+                response = JSON.parse(response);
+                _this.refreshCount(response.secu.count);
+            },
+
+            function(error) {
+                
+                window.SECU.Error.show([error]);
+            }
+        );
+    },
+
     init: function() {
 
         var _this = this,
@@ -85,6 +111,8 @@ window.SECU.App = {
                 el: document.getElementsByClassName('secuApp')[0],
                 template: '#secuApp',
                 data: {
+                    count: 'A lot of',
+                    
                     show: {
                         main: true,
                         faq: false,
@@ -323,6 +351,8 @@ window.SECU.App = {
                         ractive.set('decrypt.loaded', true);
                         ractive.set('decrypt.formActive', true);
                         ractive.set('formDisabled', false);
+
+                        _this.refreshCount(response.stat.secu.count);
                     },
                     
                     function(error) {
@@ -413,6 +443,8 @@ window.SECU.App = {
                         setTimeout(function() {
                             document.getElementById('containerLink').select();
                         }, 0);
+
+                        _this.refreshCount(response.stat.secu.count);
                     },
                     
                     function(error) {
@@ -486,6 +518,10 @@ window.SECU.App = {
         window.SECU.Helpers.checkDragDrop();
         window.SECU.Helpers.watchDragDrop();
         window.SECU.Helpers.watchScroll();
+
+        window.SECU.Ajax.assignHost();
+
+        this.requestCount();
     }
 };
 

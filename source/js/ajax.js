@@ -12,13 +12,25 @@ window.SECU.Ajax = {
                 host: 'https://api.secu.su',
                 feedback: '/feedback',
                 post: '/s',
-                get: '/s/'
+                get: '/s/',
+                stat: '/stat'
             },
             
             web: {
                 host: 'https://secu.su',
                 page: '/'
             }
+        }
+    },
+
+    assignHost: function() {
+
+        var data = this._data,
+            host = window.location.host;
+
+        if (host.indexOf('localhost') > -1) {
+            data.url.api.host = 'https://api-test.secu.su';
+            data.url.web.host = host;
         }
     },
 
@@ -82,6 +94,16 @@ window.SECU.Ajax = {
             contentType: 'application/json;charset=UTF-8',
             data: JSON.stringify(obj),
             url: data.url.api.host + data.url.api.post
-        })        
+        });
+    },
+
+    getCount: function() {
+
+        var data = this._data;
+
+        return this.call({
+            method: 'GET',
+            url: data.url.api.host + data.url.api.stat
+        });
     }
 };

@@ -329,6 +329,18 @@ button,
     transition: background-color 100ms ease-in-out, color 100ms ease-in-out, border-color 100ms ease-in-out;
 }
 
+.counter{
+    text-align: center;
+    padding: 2rem 0 0 0;
+    color: $colour-dark-gray;
+
+    span{
+        font-weight: 600;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+    }
+}
+
 @media (min-width: 400px) { 
     .navbar.docked,
     .errorContainer{
@@ -345,5 +357,10 @@ button,
         .columns{
             width: 80%;
         }
+    }
+
+    .counter{
+        text-align: left;
+        padding: 5.3rem 0 0 0;
     }
 }
