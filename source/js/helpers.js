@@ -119,5 +119,11 @@ window.SECU.Helpers = {
         document.execCommand('copy');
         node.blur();
         window.getSelection().removeAllRanges();
+    },
+
+    formatCounter: function(number) {
+        
+        number = parseInt(number, 10);
+        return number.toLocaleString();
     }
 };
