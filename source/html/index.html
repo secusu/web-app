@@ -71,9 +71,11 @@
           </a>
         </div>
         <div class="four columns">
-          <div class="counter">
-            <strong>{{count}}</strong> <span>links served</span>
-          </div>
+          {{#counter}}
+            <div class="counter {{show ? 'active' : ''}}">
+              <strong>{{number}}</strong> <span>links served</span>
+            </div>
+          {{/counter}}
         </div>
       </div>
       <nav class="row navbar-spacer"></nav>
@@ -397,7 +399,7 @@
                         </div>
                       {{/fileData}}
                       <button
-                        class="{{formDisabled ? '' : 'button-primary'}}"
+                        class="{{formDisabled || dropActive ? '' : 'button-primary'}}"
                         disabled="{{formDisabled ? true : false}}"
                         on-tap="attachFile"
                         on-enter="attachFile"

@@ -333,6 +333,12 @@ button,
     text-align: center;
     padding: 2rem 0 0 0;
     color: $colour-dark-gray;
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+
+    &.active{
+        opacity: 1;
+    }
 
     span{
         font-weight: 600;
