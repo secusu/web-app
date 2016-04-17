@@ -18,10 +18,12 @@ gulp.task('build-css', function() {
 gulp.task('build-js', function() {
     return gulp.src([
             'source/js/sjcl.js',
+            'source/js/socket.io.js',
             'source/js/ractive.js',
             'source/js/ractive-events-tap.js',
             'source/js/ractive-events-keys.js',
             'source/js/ajax.js',
+            'source/js/socket.js',
             'source/js/crypt.js',
             'source/js/helpers.js',
             'source/js/file.js',
