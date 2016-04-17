@@ -2,7 +2,7 @@
 
 [![Gitter chat](https://badges.gitter.im/secusu/secusu.svg)](https://gitter.im/secusu/secusu)
 
-Sёcu is a web application design to create, store and provide [Sёcu API](secusu/secusu) self-destructing data payloads.
+SËCU is a web application design to create, store and provide [SËCU API](secusu/secusu) self-destructing data payloads.
 
 <p align="center">
 <img src="https://cloud.githubusercontent.com/assets/1849174/14016031/cbd32b58-f1d6-11e5-9a18-864e660b9af5.png">
@@ -48,8 +48,8 @@ gulp
 
 ## Contributing
 
-Please refer to [CONTRIBUTING.md](https://github.com/secusu/web-app/blob/master/CONTRIBUTING.md) for information on how to contribute to Sёcu and its related projects.
+Please refer to [CONTRIBUTING.md](https://github.com/secusu/web-app/blob/master/CONTRIBUTING.md) for information on how to contribute to SËCU and its related projects.
 
 ## License
 
-The Sёcu web application is an open-sourced software licensed under the [MIT](https://opensource.org/licenses/MIT).
+The SËCU web application is an open-sourced software licensed under the [MIT](https://opensource.org/licenses/MIT).

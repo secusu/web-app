@@ -8,13 +8,13 @@
             <strong>SËCU</strong>
           </a>
         </div>
-        <div class="four columns">
-          {{#counter}}
+        {{#counter}}
+          <div class="four columns counter-wrapper {{show ? 'active' : ''}}">
             <div class="counter {{show ? 'active' : ''}}">
               <strong>{{number}}</strong> <span>links served</span>
             </div>
-          {{/counter}}
-        </div>
+          </div>
+        {{/counter}}
       </div>
       <nav class="row navbar-spacer"></nav>
       <nav class="row navbar">

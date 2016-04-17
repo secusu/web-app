@@ -84,26 +84,6 @@ window.SECU.App = {
         data.app.set('counter.show', true);
     },
 
-    requestCount: function() {
-
-        var _this = this,
-            data = this._data;
-
-        window.SECU.Ajax.getCount().then(
-
-            function(response) {
-
-                response = JSON.parse(response);
-                _this.refreshCount(response.secu.count);
-            },
-
-            function(error) {
-                
-                window.SECU.Error.show([error]);
-            }
-        );
-    },
-
     init: function() {
 
         var _this = this,
@@ -355,8 +335,6 @@ window.SECU.App = {
                         ractive.set('decrypt.loaded', true);
                         ractive.set('decrypt.formActive', true);
                         ractive.set('formDisabled', false);
-
-                        _this.refreshCount(response.stat.secu.count);
                     },
                     
                     function(error) {
@@ -447,8 +425,6 @@ window.SECU.App = {
                         setTimeout(function() {
                             document.getElementById('containerLink').select();
                         }, 0);
-
-                        _this.refreshCount(response.stat.secu.count);
                     },
                     
                     function(error) {
@@ -525,7 +501,7 @@ window.SECU.App = {
 
         window.SECU.Ajax.assignHost();
 
-        this.requestCount();
+        window.SECU.Socket.init();
     }
 };
 
