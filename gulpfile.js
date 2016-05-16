@@ -22,12 +22,15 @@ gulp.task('build-js', function() {
             'source/js/ractive.js',
             'source/js/ractive-events-tap.js',
             'source/js/ractive-events-keys.js',
+            'source/js/autolinker.js',
             'source/js/ajax.js',
             'source/js/socket.js',
             'source/js/crypt.js',
             'source/js/helpers.js',
             'source/js/file.js',
             'source/js/errors.js',
+            'source/js/chat.js',
+            'source/js/notifications.js',
             'source/js/main.js'
         ])
         .pipe(closureCompiler({
@@ -35,6 +38,7 @@ gulp.task('build-js', function() {
             fileName: 'app.js',
             compilerFlags: {
                 language_in: 'ES5',
+                //compilation_level: 'WHITESPACE_ONLY',
                 compilation_level: 'SIMPLE_OPTIMIZATIONS',
                 warning_level: 'QUIET'
             }

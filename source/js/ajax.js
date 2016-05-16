@@ -10,15 +10,18 @@ window.SECU.Ajax = {
             
             api: {
                 host: 'https://api.secu.su',
+                port: '3000',
                 feedback: '/feedback',
                 post: '/s',
                 get: '/s/',
-                stat: '/stat'
+                stat: '/stat',
+                chat: '/r'
             },
             
             web: {
                 host: 'https://secu.su',
-                page: '/'
+                page: '/',
+                chat: '/c/'
             }
         }
     },
@@ -28,8 +31,9 @@ window.SECU.Ajax = {
         var data = this._data,
             host = window.location.host;
 
-        if (host.indexOf('localhost') > -1) {
-            data.url.api.host = 'https://api-test.secu.su';
+        if (window.location.host !== 'secu.su') {
+            data.url.api.host = 'http://api-test.secu.su';
+            data.url.api.port = '7001';
             data.url.web.host = host;
         }
     },
@@ -94,16 +98,6 @@ window.SECU.Ajax = {
             contentType: 'application/json;charset=UTF-8',
             data: JSON.stringify(obj),
             url: data.url.api.host + data.url.api.post
-        });
-    },
-
-    getCount: function() {
-
-        var data = this._data;
-
-        return this.call({
-            method: 'GET',
-            url: data.url.api.host + data.url.api.stat
         });
     }
 };

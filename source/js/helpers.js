@@ -6,23 +6,112 @@ window.SECU.Helpers = {
 
     _data: {},
 
+    getHumanTime: function(date) {
+
+        function addLeadingZero(str) {
+            if (str.toString().length === 1) {
+                str = '0' + str;
+            }
+
+            return str;
+        }
+
+        date = new Date(date);
+
+        return addLeadingZero(date.getHours()) + ':' + addLeadingZero(date.getMinutes());
+    },
+
+    checkVisibility: function() {
+
+        var state = document.visibilityState,
+            app = window.SECU.App._data.app;
+
+        switch(state) {
+            case 'hidden':
+                app.set('windowFocused', false);
+                break;
+            case 'visible':
+            default:
+                app.set('windowFocused', true);
+                break;
+        }
+    },
+
+    watchWindowFocus: function() {
+        document.addEventListener('visibilitychange', this.checkVisibility);
+    },
+
+    parseNewLines: function(string) {
+        string = string.replace(/(?:\r\n|\r|\n)/g, '<br>');
+        return string;
+    },
+
+    convertToPlainText: function(string) {
+        return string.replace(/[&<>"']/g, function($0) {
+            return "&" + {"&":"amp", "<":"lt", ">":"gt", '"':"quot", "'":"#39"}[$0] + ";";
+        });
+    },
+
+    getPosition: function(elem) {
+        
+        var box = elem.getBoundingClientRect(),
+
+            body = document.body,
+            docEl = document.documentElement,
+
+            scrollTop = window.pageYOffset || docEl.scrollTop || body.scrollTop,
+            scrollLeft = window.pageXOffset || docEl.scrollLeft || body.scrollLeft,
+
+            clientTop = docEl.clientTop || body.clientTop || 0,
+            clientLeft = docEl.clientLeft || body.clientLeft || 0,
+
+            top  = box.top + scrollTop - clientTop,
+            left = box.left + scrollLeft - clientLeft;
+
+        return {top: Math.round(top), left: Math.round(left)};
+    },
+
+    generateTimestamp: function(date) {
+
+        var now = null;
+
+        if (date) {
+            now = new Date(date);
+        } else {
+            now = new Date();
+        }
+
+        return now.getTime();
+    },
+
+    watchResize: function() {
+
+        window.addEventListener('resize', this.fixChatFeedHeight, false);
+
+    },
+
+    dockNavbar: function(state) {
+        window.SECU.App._data.app.set('dock.navbar', state);
+    },
+
     watchScroll: function() {
 
-        var data = this._data;
+        var data = this._data,
+            app = window.SECU.App._data.app;
 
         data.nav = {};
-
-        data.nav.bar = document.getElementsByClassName('navbar')[0];
         data.nav.spacer = document.getElementsByClassName('navbar-spacer')[0];
 
         function watch(event) {
-
+            
+            if (app.get('show.chat') && !app.get('chat.formActive')) {
+                return;
+            }
+            
             if (document.body.scrollTop > data.nav.spacer.offsetTop) {
-                data.nav.bar.classList.add('docked');
-                data.nav.spacer.classList.add('docked');
+                window.SECU.Helpers.dockNavbar(true);
             } else {
-                data.nav.bar.classList.remove('docked');
-                data.nav.spacer.classList.remove('docked');
+                window.SECU.Helpers.dockNavbar(false);
             }
         }
 
@@ -44,6 +133,10 @@ window.SECU.Helpers = {
 
             clearTimeout(data.dropTimeout);
 
+            var type = null,
+                path = null,
+                files = null;
+
             switch(event.type) {
                 case 'dragenter':
                 case 'dragover':
@@ -59,10 +152,22 @@ window.SECU.Helpers = {
                     break;
                 case 'drop':
                     ractive.set('dropActive', false);
-                    if (document.getElementsByClassName('attachedFile').length) {
-                        ractive.set('encrypt.rawFile', [event.dataTransfer.files[0]]);
-                        ractive.fire('checkFile');
+
+                    files = event.dataTransfer.files;
+
+                    if (document.getElementById('chatFile')) {
+                        type = 'room';
+                        path = 'chat.room.rawFile';
+                    } else if (document.getElementById('messageFile')) {
+                        type = 'encrypt';
+                        path = 'encrypt.rawFile';
                     }
+
+                    if (files.length && type && path) {
+                        ractive.set(path, [event.dataTransfer.files[0]]);
+                        ractive.fire('checkFile', null, type);
+                    }
+                    
                     break;
             }
         }
@@ -74,12 +179,29 @@ window.SECU.Helpers = {
     },
 
     checkLocation: function() {
-        
-        var id = window.location.pathname.substring(1);
-        
-        if (id.length) {
-            window.SECU.App._data.app.set('decrypt.hash', id);
+
+        var loc = window.location.pathname,
+            id = null;
+
+        if (loc.indexOf('/c/') > -1) {
+            id = window.location.pathname.substring(3);
+
+            if (id.length) {
+                window.SECU.App._data.app.set('chat.form.room', id);
+            }
+
+            window.SECU.App._data.app.fire('toggleView', null, 'chat');
+        } else {
+            id = window.location.pathname.substring(1);
+
+            if (id.length) {
+                window.SECU.App._data.app.set('decrypt.hash', id);
+            }
         }
+    },
+
+    checkNotification: function() {
+        window.SECU.App._data.app.set('supportedFeatures.notification', 'Notification' in window);
     },
 
     checkCopy: function() {
@@ -95,7 +217,34 @@ window.SECU.Helpers = {
         window.SECU.App._data.app.set('supportedFeatures.dragdrop', 'ondragstart' in div && 'ondrop' in div);
     },
 
-    fixHeight: function(event, type) {
+    /*getAbsoluteHeight: function(el) {
+
+        var styles = window.getComputedStyle(el),
+            margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
+
+        return Math.ceil(el.offsetHeight + margin);
+    },*/
+
+    fixChatFeedHeight: function() {
+
+        var _this = window.SECU.Helpers,
+            chat = document.getElementById('chat-feed-block'),
+            form = document.getElementById('chat-form-block'),
+            scrolledToBottom = window.SECU.Chat.scrolledToBottom();
+
+        if (!chat) {
+            return;
+        }
+        
+        chat.style.height = '0px';
+        chat.style.height = _this.getPosition(form).top - _this.getPosition(chat).top + 'px';
+
+        if (scrolledToBottom) {
+            window.SECU.Chat.updateScroll('bottom');
+        }
+    },
+
+    fixTextareaHeight: function(event, type) {
         var ractive = window.SECU.App._data.app,
             node = event ? event.node : document.getElementById(type + 'ContainerBody'),
             borderWidth = getComputedStyle(node).getPropertyValue('border-width');

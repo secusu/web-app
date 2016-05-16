@@ -5,18 +5,28 @@
 }(this, function (exports) { 'use strict';
 
 	// TODO can we just declare the keydowhHandler once? using `this`?
-	function makeKeyDefinition(code) {
+	function makeKeyDefinition(code, special) {
 		return function (node, fire) {
 			function keydownHandler(event) {
 				var which = event.which || event.keyCode;
 
-				if (which === code) {
+				function doAction() {
 					event.preventDefault();
 
 					fire({
 						node: node,
 						original: event
 					});
+				}
+
+				if (which === code) {
+					if (special) {
+						if (event[special]) {
+							doAction();
+						}
+					} else {
+						doAction();
+					}
 				}
 			}
 
@@ -40,7 +50,10 @@
 	var downarrow = makeKeyDefinition(40);
 	var uparrow = makeKeyDefinition(38);
 
+	var ctrlenter = makeKeyDefinition(13, 'ctrlKey');
+
 	exports.enter = enter;
+	exports.ctrlenter = ctrlenter;
 	exports.tab = tab;
 	exports.escape = ractive_events_keys__escape;
 	exports.space = space;
