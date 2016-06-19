@@ -13,6 +13,7 @@ window.SECU.App = {
                 done: false,
                 link: '',
                 formActive: true,
+                formDisabled: false,
                 rawFile: [],
                 fileData: {
                     size: '',
@@ -34,6 +35,7 @@ window.SECU.App = {
                 success: true,
                 hash: '',
                 loaded: false,
+                formDisabled: false,
                 formActive: false,
                 message: '',
                 files: [],
@@ -48,12 +50,47 @@ window.SECU.App = {
                 textareaHeight: '0px'
             },
             feedback: {
+                formDisabled: false,
                 sent: false,
                 form: {
                     body: '',
                     email: ''
                 },
                 textareaHeight: '0px'
+            },
+            chat: {
+                enabled: false,
+                done: false,
+                formDisabled: false,
+                formActive: true,
+                room: {
+                    scrolled: true,
+                    unread: false,
+                    connection: {
+                        link: '',
+                        room: '',
+                        name: '',
+                        key: ''
+                    },
+                    feed: [],
+                    roster: [],
+                    rawFile: [],
+                    fileData: {
+                        size: '',
+                        name: '',
+                        extension: ''
+                    },
+                    input: {
+                        text: '',
+                        file: ''
+                    },
+                    feedHeight: '0px'
+                },
+                form: {
+                    room: '',
+                    password: ''
+                }/*,
+                textareaHeight: '0px'*/
             }
         }
     },
@@ -63,18 +100,32 @@ window.SECU.App = {
         var data = this._data,
             app = data.app;
 
+        app.set('textCopied', false);
+        app.set('dropActive', false);
+
         if (reset) {
             window.SECU.Error.hide();
             history.replaceState({}, 'Sëcu', '/');
         }
 
-        app.set('formDisabled', false);
-        app.set('textCopied', false);
-        app.set('dropActive', false);
-        
-        app.set('decrypt', JSON.parse(JSON.stringify(data.params.decrypt)));
-        app.set('encrypt', JSON.parse(JSON.stringify(data.params.encrypt)));
-        app.set('feedback', JSON.parse(JSON.stringify(data.params.feedback)));
+        switch(reset) {
+            case 'package':
+                app.set('decrypt', JSON.parse(JSON.stringify(data.params.decrypt)));
+                app.set('encrypt', JSON.parse(JSON.stringify(data.params.encrypt)));
+                break;
+            case 'feedback':
+                app.set('feedback', JSON.parse(JSON.stringify(data.params.feedback)));
+                break;
+            case 'chat':
+                app.set('chat', JSON.parse(JSON.stringify(data.params.chat)));
+                break;
+            default:
+                app.set('decrypt', JSON.parse(JSON.stringify(data.params.decrypt)));
+                app.set('encrypt', JSON.parse(JSON.stringify(data.params.encrypt)));
+                app.set('feedback', JSON.parse(JSON.stringify(data.params.feedback)));
+                app.set('chat', JSON.parse(JSON.stringify(data.params.chat)));
+                break;
+        }
     },
 
     refreshCount: function(number) {
@@ -92,6 +143,18 @@ window.SECU.App = {
                 el: document.getElementsByClassName('secuApp')[0],
                 template: '#secuApp',
                 data: {
+                    windowFocused: true,
+
+                    dock: {
+                        navbar: false,
+                        chat: false
+                    },
+
+                    modal: {
+                        active: false,
+                        closeText: 'Close'
+                    },
+
                     counter: {
                         show: false,
                         number: '9000'
@@ -99,11 +162,11 @@ window.SECU.App = {
                     
                     show: {
                         main: true,
+                        chat: false,
                         faq: false,
                         feedback: false
                     },
-                    
-                    formDisabled: false,
+
                     textCopied: false,
                     dropActive: false,
                     
@@ -116,24 +179,75 @@ window.SECU.App = {
                     errors: {
                         show: false,
                         messages: []
-                    }
+                    },
+
+                    humanTime: window.SECU.Helpers.getHumanTime
                 }
             });
 
         data.app = app;
 
         this.reinitApp();
-        app.set('encrypt.formActive', false);
+        //app.set('encrypt.formActive', false);
 
         app.on({
+
+            scrollToBottom: function() {
+                if (this.get('chat.room.unread')) {
+                    window.SECU.Chat.updateScroll(window.SECU.Chat.unreadPos());
+                } else {
+                    window.SECU.Chat.updateScroll('bottom');
+                }
+            },
+
+            cancelSubmit: function() {
+                return false;
+            },
 
             hideError: function() {
                 window.SECU.Error.hide();
             },
 
+            chatLogout: function() {
+                window.SECU.Chat.logout({
+                    room: this.get('chat.room.connection.room')
+                });
+                
+                _this.reinitApp('chat');
+                window.SECU.Chat.enable();
+                
+                this.set('dock.chat', false);
+                window.SECU.Helpers.dockNavbar(false);
+                
+                this.fire('modalClose');
+            },
+
+            showChatLogout: function() {
+                this.set('modal.type', 'chatLogout');
+                this.set('modal.closeText', 'No');
+                this.set('modal.active', true);
+            },
+
+            showChatLink: function() {
+                this.set('modal.type', 'chatLink');
+                this.set('modal.closeText', 'Close');
+                this.set('modal.active', true);
+            },
+
+            showChatUsers: function() {
+                this.set('modal.type', 'chatRoster');
+                this.set('modal.closeText', 'Close');
+                this.set('modal.active', true);
+            },
+
+            modalClose: function() {
+                document.activeElement.blur();
+                this.set('modal.active', false);
+            },
+
             toggleView: function(event, view) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
@@ -150,11 +264,30 @@ window.SECU.App = {
                 }
                 
                 this.set('show.' + view, true);
+
+                if (view === 'chat') {
+                    if (!this.get('chat.formActive')) {
+                        this.set('dock.chat', true);
+                        window.SECU.Helpers.dockNavbar(true);
+                    
+                        setTimeout(function() {
+                            window.SECU.Chat.init();
+
+                            if (!window.SECU.Chat.scrollPresent() || (window.SECU.Chat.scrollPresent() && window.SECU.Chat.scrolledToBottom())) {
+                                app.set('chat.room.unread', false);
+                            }
+                        }, 0);
+                    }
+                } else {
+                    this.set('dock.chat', false);
+                    window.SECU.Chat.watchFeedScroll(true);
+                    window.SECU.Helpers.dockNavbar(false);
+                }
             },
 
             sendFeedback: function(event) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
@@ -168,14 +301,14 @@ window.SECU.App = {
                     return false;
                 }
 
-                ractive.set('formDisabled', true);
+                ractive.set('feedback.formDisabled', true);
 
                 window.SECU.Ajax.sendFeedback(form).then(
             
                     function(response) {
 
                         ractive.set('feedback.sent', true);
-                        ractive.set('formDisabled', false);
+                        ractive.set('feedback.formDisabled', false);
                         ractive.set('feedback.form', {
                             body: '',
                             email: ''
@@ -189,26 +322,48 @@ window.SECU.App = {
                 );
             },
 
-            fixHeight: window.SECU.Helpers.fixHeight,
+            fixTextareaHeight: window.SECU.Helpers.fixTextareaHeight,
 
-            attachFile: function(event) {
+            attachFile: function(event, type) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
-                if (this.get('encrypt.rawFile').length) {
-                    this.set('encrypt.rawFile', []);
-                    this.find('#messageFile').value = '';
+                var paths = null;
+
+                switch(type) {
+                    case 'room':
+                        paths = {
+                            raw: 'chat.room.rawFile',
+                            ractive: 'chat.room.input.file',
+                            id: '#chatFile'
+                        };
+                        break;
+                    case 'encrypt':
+                        paths = {
+                            raw: 'encrypt.rawFile',
+                            ractive: 'encrypt.file.message',
+                            id: '#messageFile'
+                        };
+                        break;
+                    default:
+                        break;
+                }
+
+                if (this.get(paths.raw).length) {
+                    this.set(paths.raw, []);
+                    this.set(paths.ractive, '');
+                    this.find(paths.id).value = '';
                 } else {
-                    this.find('#messageFile').click();
+                    this.find(paths.id).click();
                 }
             },
 
             downloadFile: function(event) {
 
                 if (!this.get('supportedFeatures.download')) {
-                    if (event.original) {
+                    if (event && event.original) {
                         event.original.preventDefault();
                     }
                     
@@ -217,12 +372,37 @@ window.SECU.App = {
                 }
             },
 
-            checkFile: function(event) {
+            checkFile: function(event, type) {
 
                 window.SECU.Error.hide();
 
                 var ractive = this,
-                    file = window.SECU.File.validated(this.get('encrypt.rawFile'));
+                    paths = null;
+
+                switch(type) {
+                    case 'room':
+                        paths = {
+                            raw: 'chat.room.rawFile',
+                            ractive: 'chat.room.input.file',
+                            data: 'chat.room.fileData'
+                        };
+                        break;
+                    case 'encrypt':
+                        paths = {
+                            raw: 'encrypt.rawFile',
+                            ractive: 'encrypt.file.message',
+                            data: 'encrypt.fileData'
+                        };
+                        break;
+                    default:
+                        break;
+                }
+                
+                if (!paths) {
+                    window.SECU.Error.show(['No file domain']);
+                }
+
+                var file = window.SECU.File.validated(this.get(paths.raw));
 
                 if (file && !file[0]) {
 
@@ -232,8 +412,8 @@ window.SECU.App = {
                     window.SECU.File.fileToBase64(file).then(
 
                         function(response) {
-                            ractive.set('encrypt.file.message', response);
-                            ractive.set('encrypt.fileData', {
+                            ractive.set(paths.ractive, response);
+                            ractive.set(paths.data, {
                                 name: file.name,
                                 size: size,
                                 extension: ext
@@ -247,22 +427,22 @@ window.SECU.App = {
                     );
 
                 } else {
-                    this.set('encrypt.fileData', {
+                    this.set(paths.data, {
                         name: '',
                         size: '',
                         extension: ''
                     });
 
                     if (file[0]) {
-                        this.set('encrypt.rawFile', []);
+                        this.set(paths.raw, []);
                         window.SECU.Error.show(['The file is too big']);
                     }
                 }
             },
             
             resetApp: function(event, reset) {
-                
-                if (event.original) {
+
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
@@ -271,14 +451,14 @@ window.SECU.App = {
 
             requestContainer: function(event, id) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
                 var ractive = this,
                     file = null;
 
-                ractive.set('formDisabled', true);
+                ractive.set('decrypt.formDisabled', true);
 
                 window.SECU.Ajax.requestContainer(id).then(
             
@@ -286,35 +466,17 @@ window.SECU.App = {
 
                         response = JSON.parse(response);
 
-                        if (!response.data.hasOwnProperty('text')) {
-                            
-                            /* Old structure. Remove on April 27th */
+                        if (typeof response.data.text === 'string') {
+                            ractive.set('decrypt.message', response.data.text);
+                            ractive.set('decrypt.done', true);
 
-                            if (response.data.hasOwnProperty('plaintext')) {
-                                ractive.set('decrypt.message', response.data.plaintext);
-                                ractive.set('decrypt.done', true);
-
-                                if (response.data.plaintext.length) {
-                                    setTimeout(function() {
-                                        window.SECU.Helpers.fixHeight(null, 'decrypt');
-                                    }, 0);
-                                }
-                            } else {
-                                ractive.set('decrypt.form.message', JSON.stringify(response.data));
+                            if (response.data.text.length) {
+                                setTimeout(function() {
+                                    window.SECU.Helpers.fixTextareaHeight(null, 'decrypt');
+                                }, 0);
                             }
                         } else {
-                            if (typeof response.data.text === 'string') {
-                                ractive.set('decrypt.message', response.data.text);
-                                ractive.set('decrypt.done', true);
-
-                                if (response.data.text.length) {
-                                    setTimeout(function() {
-                                        window.SECU.Helpers.fixHeight(null, 'decrypt');
-                                    }, 0);
-                                }
-                            } else {
-                                ractive.set('decrypt.form.message', JSON.stringify(response.data.text));
-                            }
+                            ractive.set('decrypt.form.message', JSON.stringify(response.data.text));
                         }
 
                         if (response.data.files && response.data.files[0]) {
@@ -334,7 +496,7 @@ window.SECU.App = {
 
                         ractive.set('decrypt.loaded', true);
                         ractive.set('decrypt.formActive', true);
-                        ractive.set('formDisabled', false);
+                        ractive.set('decrypt.formDisabled', false);
                     },
                     
                     function(error) {
@@ -351,7 +513,7 @@ window.SECU.App = {
 
             copyText: function(event, id) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
                 
@@ -365,10 +527,84 @@ window.SECU.App = {
                     ractive.set('textCopied', false);
                 }, 1000);
             },
+
+            sendChat: function(event) {
+
+                if (event && event.original) {
+                    event.original.preventDefault();
+                }
+
+                var room = this.get('chat.room'),
+                    message = room.input.text,
+                    file = room.input.file;
+
+                if (!message.trim().length && !file.length) {
+                    return;
+                }
+
+                if (message.trim().length) {
+                    message = JSON.parse(window.SECU.Crypt.encrypt({message: message, password: room.connection.key}));
+                } else {
+                    message = '';
+                }
+
+                if (file.length) {
+                    file = [
+                        {
+                            data: JSON.parse(window.SECU.Crypt.encrypt({message: file, password: room.connection.key})),
+                            name: room.fileData.name
+                        }
+                    ];
+                } else {
+                    file = [];
+                }
+
+                var timestamp = window.SECU.Helpers.generateTimestamp(),
+                    dataPackage = {
+                        room: room.connection.room,
+                        data: {
+                            text: message,
+                            files: file
+                        },
+                        sent_at: timestamp
+                    };
+
+                window.SECU.Chat.addSentQueue(dataPackage);
+                window.SECU.Chat.sendData(dataPackage);
+
+                this.set('chat.room.input', {text: '', file: ''});
+                this.set('chat.room.rawFile', []);
+                this.find('#chatFile').value = '';
+            },
+
+            createChat: function(event) {
+
+                if (event && event.original) {
+                    event.original.preventDefault();
+                }
+
+                window.SECU.Error.hide();
+
+                if (!this.get('chat.form.password').length) {
+                    window.SECU.Error.show(["You should provide a password"]);
+                    return false;
+                }
+
+                this.set('chat.formDisabled', true);
+
+                var ractive = this,
+                    auth = this.get('chat.form');
+
+                if (!auth.room.length) {
+                    window.SECU.Chat.create(auth);
+                } else {
+                    window.SECU.Chat.join(auth);
+                }
+            },
             
             createContainer: function(event) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
@@ -379,7 +615,7 @@ window.SECU.App = {
                     return false;
                 }
 
-                this.set('formDisabled', true);
+                this.set('encrypt.formDisabled', true);
 
                 var ractive = this,
                     password = this.get('encrypt.form.password'),
@@ -420,7 +656,7 @@ window.SECU.App = {
                         ractive.set('encrypt.link', window.SECU.Ajax._data.url.web.host + window.SECU.Ajax._data.url.web.page + response.hash);
                         ractive.set('encrypt.formActive', false);
                         ractive.set('encrypt.done', true);
-                        ractive.set('formDisabled', false);
+                        ractive.set('encrypt.formDisabled', false);
 
                         setTimeout(function() {
                             document.getElementById('containerLink').select();
@@ -436,7 +672,7 @@ window.SECU.App = {
 
             decryptContainer: function(event) {
 
-                if (event.original) {
+                if (event && event.original) {
                     event.original.preventDefault();
                 }
 
@@ -449,7 +685,7 @@ window.SECU.App = {
 
                 var password = this.get('decrypt.form.password');
 
-                this.set('formDisabled', true);
+                this.set('decrypt.formDisabled', true);
                 this.set('decrypt.fileForm.password', password);
 
                 if (this.get('decrypt.form.message').length) {
@@ -479,11 +715,11 @@ window.SECU.App = {
                 });
 
                 this.set('decrypt.done', true);
-                this.set('formDisabled', false);
+                this.set('decrypt.formDisabled', false);
 
                 if (this.get('decrypt.success') && this.get('decrypt.message').length) {
                     setTimeout(function() {
-                        window.SECU.Helpers.fixHeight(null, 'decrypt');
+                        window.SECU.Helpers.fixTextareaHeight(null, 'decrypt');
                         setTimeout(function() {
                             document.getElementById('decryptContainerBody').select();
                         }, 0);
@@ -492,15 +728,31 @@ window.SECU.App = {
             }
         });
 
+        app.observe('windowFocused', function(newValue, oldValue, keypath) {
+            if (newValue && this.get('show.chat')) {
+                if (!window.SECU.Chat.scrollPresent()) {
+                    this.set('chat.room.unread', false);
+                }
+            }
+        });
+
+        window.SECU.Helpers.Autolinker = new Autolinker({
+            twitter: false
+        });
+
         window.SECU.Helpers.checkLocation();
         window.SECU.Helpers.checkCopy();
         window.SECU.Helpers.checkDownload();
         window.SECU.Helpers.checkDragDrop();
+        window.SECU.Helpers.checkNotification();
+        
         window.SECU.Helpers.watchDragDrop();
         window.SECU.Helpers.watchScroll();
+        window.SECU.Helpers.watchResize();
+        window.SECU.Helpers.watchWindowFocus();
 
+        window.SECU.Helpers.checkVisibility();
         window.SECU.Ajax.assignHost();
-
         window.SECU.Socket.init();
     }
 };

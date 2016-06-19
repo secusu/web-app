@@ -50,9 +50,9 @@ window.SECU.File = {
         size = Math.round(size/1000);
 
         if (size >= 1000) {
-            size = (size/1000).toFixed(1) + 'MB'
+            size = (size/1000).toFixed(1) + 'MB';
         } else {
-            size += 'KB'
+            size += 'KB';
         }
 
         return size;
