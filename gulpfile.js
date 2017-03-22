@@ -23,6 +23,7 @@ gulp.task('build-js', function() {
             'source/js/ractive-events-tap.js',
             'source/js/ractive-events-keys.js',
             'source/js/autolinker.js',
+            'source/js/promise.js',
             'source/js/ajax.js',
             'source/js/socket.js',
             'source/js/crypt.js',
