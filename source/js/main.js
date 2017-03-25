@@ -477,6 +477,9 @@ window.SECU.App = {
                             }
                         } else {
                             ractive.set('decrypt.form.message', JSON.stringify(response.data.text));
+                            setTimeout(function() {
+                                document.getElementById('decryptPassword').focus();
+                            }, 0);
                         }
 
                         if (response.data.files && response.data.files[0]) {
