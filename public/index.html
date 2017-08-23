@@ -21,15 +21,15 @@
         <div class="twelve columns">
           <ul>
             {{#show}}
-              <li><a class="{{main ? 'active' : ''}}" on-tap="toggleView:main">Package</a></li>
+              <li><a class="{{main ? 'active' : ''}}" on-tap="['toggleView', 'main']">Package</a></li>
               <li>
-                <a class="chat {{chat ? 'active' : ''}} {{../chat.enabled ? 'online' : ''}}" on-tap="toggleView:chat">
+                <a class="chat {{chat ? 'active' : ''}} {{../chat.enabled ? 'online' : ''}}" on-tap="['toggleView', 'chat']">
                   Chat
                   <i class="{{../chat.room.unread ? 'unread' : ''}}"></i>
                 </a>
               </li>
-              <li><a class="{{faq ? 'active' : ''}}" on-tap="toggleView:faq">FAQ</a></li>
-              <li><a class="{{feedback ? 'active' : ''}}" on-tap="toggleView:feedback">Contact</a></li>
+              <li><a class="{{faq ? 'active' : ''}}" on-tap="['toggleView', 'faq']">FAQ</a></li>
+              <li><a class="{{feedback ? 'active' : ''}}" on-tap="['toggleView', 'feedback']">Contact</a></li>
             {{/show}}
           </ul>
         </div>
@@ -146,7 +146,7 @@
             </ul>
           </div>
         </div>
-      {{/show}}
+      {{/show.faq}}
       
       {{#show.feedback}}
         <div class="row">
@@ -155,7 +155,7 @@
 
             {{#feedback}}
               {{#form}}
-                <form on-submit="cancelSubmit">
+                <form on-submit="['cancelSubmit']">
                   <label for="feedbackBody">Message</label>
                   <textarea
                     class="u-full-width"
@@ -164,7 +164,7 @@
                     placeholder="telling anything you want"
                     disabled="{{formDisabled ? true : false}}"
                     value="{{body}}"
-                    on-input="fixTextareaHeight:feedback"
+                    on-input="['fixTextareaHeight', 'feedback']"
                   ></textarea>
                   
                   <label for="feedbackEmail">Email</label>
@@ -175,15 +175,15 @@
                     placeholder="is optional"
                     disabled="{{formDisabled ? true : false}}"
                     value="{{email}}"
-                    on-enter="sendFeedback"
+                    on-enter="['sendFeedback']"
                   >
                   
                   <button
                     class="{{formDisabled || feedback.sent ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} feedbackSendButton"
                     disabled="{{feedback.sent ? true : false}}"
-                    on-tap="sendFeedback"
-                    on-enter="sendFeedback"
-                    on-space="sendFeedback"
+                    on-tap="['sendFeedback']"
+                    on-enter="['sendFeedback']"
+                    on-space="['sendFeedback']"
                   >{{feedback.sent ? 'Thanks, your message has been sent' : (formDisabled ? 'Sending' : 'Send')}}</button>
                 </form>
               {{/form}}
@@ -191,7 +191,7 @@
 
           </div>
         </div>
-      {{/show}}
+      {{/show.feedback}}
 
       {{#show.chat}}
         {{#chat}}
@@ -201,7 +201,7 @@
                 <div class="row">
                   <div class="twelve columns">
                     <h6>{{room.trim().length ? 'Join' : 'Create'}} room</h6>
-                    <form on-submit="cancelSubmit">
+                    <form on-submit="['cancelSubmit']">
                       <label for="newChatRoom">Room</label>
                       <input
                         class="u-full-width"
@@ -210,7 +210,7 @@
                         placeholder="leave blank to create a new room"
                         value="{{room}}"
                         disabled="{{done || formDisabled ? true : false}}"
-                        on-enter="createChat"
+                        on-enter="['createChat']"
                       >
                       <label for="newChatPassword">Password</label>
                       <input
@@ -220,15 +220,15 @@
                         placeholder="is required"
                         value="{{password}}"
                         disabled="{{done || formDisabled ? true : false}}"
-                        on-enter="createChat"
+                        on-enter="['createChat']"
                       >
 
                       <button
                         class="{{done || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} chatCreateButton"
                         disabled="{{done || formDisabled ? true : false}}"
-                        on-tap="createChat"
-                        on-enter="createChat"
-                        on-space="createChat"
+                        on-tap="['createChat']"
+                        on-enter="['createChat']"
+                        on-space="['createChat']"
                       >{{room ? (done ? "You've joined the room" : (formDisabled ? 'Joining' : 'Join')) : (done ? 'Chat room has been created' : (formDisabled ? 'Creating' : 'Create'))}}</button>
                     </form>
                   </div>
@@ -243,21 +243,21 @@
                     <h6>Room <span>#{{connection.room}}</span></h6>
                     <a
                       class="button no-padding no-border"
-                      on-tap="showChatLink"
-                      on-enter="showChatLink"
-                      on-space="showChatLink"
+                      on-tap="['showChatLink']"
+                      on-enter="['showChatLink']"
+                      on-space="['showChatLink']"
                     ><svg class="icon small black"><use xlink:href="#link" /></svg></a>
                     <a
                       class="button no-padding no-border"
-                      on-tap="showChatLogout"
-                      on-enter="showChatLogout"
-                      on-space="showChatLogout"
+                      on-tap="['showChatLogout']"
+                      on-enter="['showChatLogout']"
+                      on-space="['showChatLogout']"
                     ><svg class="icon small black"><use xlink:href="#exit" /></svg></a>
                     <a
                       class="button no-padding no-border users"
-                      on-tap="showChatUsers"
-                      on-enter="showChatUsers"
-                      on-space="showChatUsers"
+                      on-tap="['showChatUsers']"
+                      on-enter="['showChatUsers']"
+                      on-space="['showChatUsers']"
                     ><svg class="icon small black"><use xlink:href="#users" /></svg> {{roster.length}}</a>
                   </div>
                 </div>
@@ -290,9 +290,9 @@
                                       target="_blank"
                                       href="{{data}}"
                                       download="{{name}}"
-                                      on-tap="downloadFile"
-                                      on-enter="downloadFile"
-                                      on-space="downloadFile"
+                                      on-tap="['downloadFile']"
+                                      on-enter="['downloadFile']"
+                                      on-space="['downloadFile']"
                                       class="attachedFile multiline active">
                                       <i class="file">{{extension}}</i>
                                       {{name}}
@@ -308,39 +308,39 @@
                   </div>
                   <a
                     class="button button-primary no-padding toBottom {{!scrolled ? 'active' : ''}} {{unread ? 'unread' : ''}}"
-                    on-tap="scrollToBottom"
-                    on-enter="scrollToBottom"
-                    on-space="scrollToBottom"
+                    on-tap="['scrollToBottom']"
+                    on-enter="['scrollToBottom']"
+                    on-space="['scrollToBottom']"
                   ><svg class="icon small white"><use xlink:href="#arrowDown" /></svg></a>
                 </div>
                 <div id="chat-form-block" class="row chat-form">
                   <div class="twelve columns">
-                    <form on-submit="cancelSubmit">
+                    <form on-submit="['cancelSubmit']">
                       <textarea
                         class="u-full-width"
                         id="roomContainerBody"
                         placeholder="Your message"
                         value="{{input.text}}"
                         disabled="{{formDisabled ? true : false}}"
-                        on-ctrlenter="sendChat"
+                        on-ctrlenter="['sendChat']"
                       ></textarea>
                       <div class="chat-form-controls">
                         <button
                           class="chatSendButton button-primary"
-                          on-tap="sendChat"
-                          on-enter="sendChat"
-                          on-space="sendChat"
+                          on-tap="['sendChat']"
+                          on-enter="['sendChat']"
+                          on-space="['sendChat']"
                         >Send</button>
                         <input
                           id="chatFile"
                           type="file"
                           value="{{rawFile}}"
                           disabled="{{formDisabled ? true : false}}"
-                          on-change="checkFile:room"
-                          on-enter="attachFile:room"
+                          on-change="['checkFile', 'room']"
+                          on-enter="['attachFile', 'room']"
                         >
                         {{#fileData}}
-                          <div class="attachedFile oneline {{rawFile.length ? 'active' : ''}}" on-tap="attachFile:room">
+                          <div class="attachedFile oneline {{rawFile.length ? 'active' : ''}}" on-tap="['attachFile', 'room']">
                             <i class="file">{{rawFile.length ? extension : '?'}}</i>
                             {{rawFile.length ? (size + ' — ' + name) : 'less than 1.5MB'}}
                             <div class="button drop {{dropActive ? 'active' : ''}}">Drop file here</div>
@@ -361,7 +361,7 @@
             </div>
           {{/enabled}}
         {{/chat}}
-      {{/show}}
+      {{/show.chat}}
 
       {{#show.main}}
         <div class="row">
@@ -374,7 +374,7 @@
                   
                   {{#done}}
                     <h6>Data package opened</h6>
-                    <form on-submit="cancelSubmit">
+                    <form on-submit="['cancelSubmit']">
                       {{#success}}
                         <label>Contents of #{{hash}}</label>
                         {{#message.length}}
@@ -385,19 +385,19 @@
                             style="height: {{textareaHeight}}"
                             value="{{message}}"
                             readonly=true
-                            on-tap="selectInput"
+                            on-tap="['selectInput']"
                           ></textarea>
                         
                           {{#supportedFeatures.copy}}
                             <button
                               class="{{textCopied ? '' : 'button-primary'}} copyButton"
                               disabled="{{textCopied ? true : false}}"
-                              on-tap="copyText:decryptContainerBody"
-                              on-enter="copyText:decryptContainerBody"
-                              on-space="copyText:decryptContainerBody"
+                              on-tap="['copyText', 'decryptContainerBody']"
+                              on-enter="['copyText', 'decryptContainerBody']"
+                              on-space="['copyText', 'decryptContainerBody']"
                             >text</button>
-                          {{/supportedFeatures}}
-                        {{/message}}
+                          {{/supportedFeatures.copy}}
+                        {{/message.length}}
                         
                         {{#files.length}}
                           <label>File</label>
@@ -411,12 +411,12 @@
                               target="_blank"
                               href="{{data}}"
                               download="{{name}}"
-                              on-tap="downloadFile"
-                              on-enter="downloadFile"
-                              on-space="downloadFile"
+                              on-tap="['downloadFile']"
+                              on-enter="['downloadFile']"
+                              on-space="['downloadFile']"
                             >Download</a>
                           {{/files}}
-                        {{/files}}
+                        {{/files.length}}
                       {{/success}}
                       
                       {{^success}}
@@ -426,9 +426,9 @@
                       <br>
                       <button
                         class="button-primary createContainer"
-                        on-tap="resetApp:package"
-                        on-enter="resetApp:package"
-                        on-space="resetApp:package"
+                        on-tap="['resetApp', 'package']"
+                        on-enter="['resetApp', 'package']"
+                        on-space="['resetApp', 'package']"
                       >Create another package</button>
                     </form>
                   {{/done}}
@@ -436,7 +436,7 @@
                   {{^done}}
                     <h6>Open data package</h6>
                     {{#form}}
-                      <form on-submit="cancelSubmit">
+                      <form on-submit="['cancelSubmit']">
                         <label for="decryptPassword">Password</label>
                         <input
                           class="u-full-width"
@@ -445,21 +445,21 @@
                           placeholder="is required"
                           value="{{password}}"
                           disabled="{{formDisabled ? true : false}}"
-                          on-enter="decryptContainer"
+                          on-enter="['decryptContainer']"
                         >
                         
                         <button
                           class="button-primary"
-                          on-tap="decryptContainer"
-                          on-enter="decryptContainer"
-                          on-space="decryptContainer"
+                          on-tap="['decryptContainer']"
+                          on-enter="['decryptContainer']"
+                          on-space="['decryptContainer']"
                         >Open</button>
                       </form>
                     {{/form}}
                   {{/done}}
 
                 {{/decrypt}}
-              {{/decrypt}}
+              {{/decrypt.formActive}}
 
               {{^decrypt.formActive}}
                 <h6>Load data package</h6>
@@ -467,14 +467,14 @@
                 
                 <button
                   class="{{decrypt.loaded || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} containerLoadButton"
-                  on-tap="requestContainer:{{decrypt.hash}}"
-                  on-enter="requestContainer:{{decrypt.hash}}"
-                  on-space="requestContainer:{{decrypt.hash}}"
+                  on-tap="['requestContainer', decrypt.hash]"
+                  on-enter="['requestContainer', decrypt.hash]"
+                  on-space="['requestContainer', decrypt.hash]"
                 >{{decrypt.loaded ? 'Package has been loaded' : (formDisabled ? 'Loading' : 'Load')}}</button>
-              {{/decrypt}}
+              {{/decrypt.formActive}}
 
             </div>
-          {{/decrypt}}
+          {{/decrypt.hash.length}}
 
           {{^decrypt.hash.length}}
             <div class="twelve columns">
@@ -482,7 +482,7 @@
               {{#encrypt}}
                 {{#done}}
                   <h6>Data package created</h6>
-                  <form on-submit="cancelSubmit">
+                  <form on-submit="['cancelSubmit']">
                     <label for="containerLink">Link</label>
                     <input
                       class="u-full-width"
@@ -490,26 +490,26 @@
                       type="text"
                       value="{{link}}"
                       readonly=true
-                      on-tap="selectInput"
-                      on-enter="selectInput"
+                      on-tap="['selectInput']"
+                      on-enter="['selectInput']"
                     >
                     
                     {{#supportedFeatures.copy}}
                       <button
                         class="{{textCopied ? '' : 'button-primary'}} copyButton"
                         disabled="{{textCopied ? true : false}}"
-                        on-tap="copyText:containerLink"
-                        on-enter="copyText:containerLink"
-                        on-space="copyText:containerLink"
+                        on-tap="['copyText', 'containerLink']"
+                        on-enter="['copyText', 'containerLink']"
+                        on-space="['copyText', 'containerLink']"
                       >link</button>
-                    {{/supportedFeatures}}
+                    {{/supportedFeatures.copy}}
                     
                     <br>
                     <button
                       class="button-primary createContainer"
-                      on-tap="resetApp:package"
-                      on-enter="resetApp:package"
-                      on-space="resetApp:package"
+                      on-tap="['resetApp', 'package']"
+                      on-enter="['resetApp', 'package']"
+                      on-space="['resetApp', 'package']"
                     >Create another package</button>
                   </form>
                 {{/done}}
@@ -517,7 +517,7 @@
                 {{#formActive}}
                   {{#form}}
                     <h6>New data package</h6>
-                    <form on-submit="cancelSubmit">
+                    <form on-submit="['cancelSubmit']">
                       <label for="encryptContentainerBody">Message</label>
                       <textarea
                         class="u-full-width"
@@ -526,7 +526,7 @@
                         placeholder="will be encrypted if password is provided"
                         value="{{message}}"
                         disabled="{{formDisabled ? true : false}}"
-                        on-input="fixTextareaHeight:encrypt"
+                        on-input="['fixTextareaHeight', 'encrypt']"
                       ></textarea>
                       
                       <label>File</label>
@@ -535,8 +535,8 @@
                         type="file"
                         value="{{rawFile}}"
                         disabled="{{formDisabled ? true : false}}"
-                        on-change="checkFile:encrypt"
-                        on-enter="attachFile:encrypt"
+                        on-change="['checkFile', 'encrypt']"
+                        on-enter="['attachFile', 'encrypt']"
                       >
                       {{#fileData}}
                         <div class="attachedFile multiline {{rawFile.length ? 'active' : ''}}">
@@ -548,9 +548,9 @@
                       <button
                         class="{{formDisabled || dropActive ? '' : 'button-primary'}}"
                         disabled="{{formDisabled ? true : false}}"
-                        on-tap="attachFile:encrypt"
-                        on-enter="attachFile:encrypt"
-                        on-space="attachFile:encrypt"
+                        on-tap="['attachFile', 'encrypt']"
+                        on-enter="['attachFile', 'encrypt']"
+                        on-space="['attachFile', 'encrypt']"
                       >{{rawFile.length ? 'Remove' : 'Attach'}}</button>
                       
                       <label for="messagePassword">Password</label>
@@ -561,15 +561,15 @@
                         placeholder="is optional"
                         value="{{password}}"
                         disabled="{{formDisabled ? true : false}}"
-                        on-enter="createContainer"
+                        on-enter="['createContainer']"
                       >
                       
                       <button
                         class="{{done || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} containerCreateButton"
                         disabled="{{formDisabled ? true : false}}"
-                        on-tap="createContainer"
-                        on-enter="createContainer"
-                        on-space="createContainer"
+                        on-tap="['createContainer']"
+                        on-enter="['createContainer']"
+                        on-space="['createContainer']"
                       >{{done ? 'Package has been created' : (formDisabled ? 'Creating' : 'Create')}}</button>
                     </form>
                   {{/form}}
@@ -582,14 +582,14 @@
                 {{/formActive}} -->
               {{/encrypt}}
             </div>
-          {{/decrypt}}
+          {{/decrypt.hash.length}}
         </div>
 
-      {{/show}}
+      {{/show.main}}
 
       {{#modal}}
         <div class="modal row {{active ? 'active' : ''}}">
-          <div class="underlay" on-tap="modalClose"></div>
+          <div class="underlay" on-tap="['modalClose']"></div>
           <div class="content twelve columns">
             {{#type === 'chatRoster'}}
               <div class="header">Users in the room</div>
@@ -607,15 +607,15 @@
             {{/type}}
             {{#type === 'chatLink'}}
               <div class="header">Room link</div>
-              <form on-submit="cancelSubmit">
+              <form on-submit="['cancelSubmit']">
                 <input
                   class="u-full-width"
                   id="chatLink"
                   type="text"
                   value="{{chat.room.connection.link}}"
                   readonly=true
-                  on-tap="selectInput"
-                  on-enter="selectInput"
+                  on-tap="['selectInput']"
+                  on-enter="['selectInput']"
                 >
               </form>
             {{/type}}
@@ -627,22 +627,22 @@
                 <a
                   class="{{textCopied ? '' : 'button-primary'}} copyButton button"
                   disabled="{{textCopied ? true : false}}"
-                  on-tap="copyText:chatLink"
-                  on-enter="copyText:chatLink"
-                  on-space="copyText:chatLink"
+                  on-tap="['copyText', 'chatLink']"
+                  on-enter="['copyText', 'chatLink']"
+                  on-space="['copyText', 'chatLink']"
                 >link</a>
               {{/type}}
               {{#type === 'chatLogout'}}
-                <a class="button button-primary" on-tap="chatLogout">Yes</a>
+                <a class="button button-primary" on-tap="['chatLogout']">Yes</a>
               {{/type}}
-              <a class="button button-primary" on-tap="modalClose">{{closeText}}</a>
+              <a class="button button-primary" on-tap="['modalClose']">{{closeText}}</a>
             </div>
           </div>
         </div>
       {{/modal}}
 
       {{#errors.show}}
-        <div class="row errorContainer" on-tap="hideError">
+        <div class="row errorContainer" on-tap="['hideError']">
           <div class="twelve columns">
             <label>Error</label>
             <ul>
@@ -650,8 +650,8 @@
               <li>
                 {{.}}
               </li>
-            {{/errors}}
+            {{/errors.messages}}
             </ul>
           </div>
         </div>
-      {{/errors}} </script> </div> <script type=text/javascript src=/js/app.js></script> </body> </html>
+      {{/errors.show}} </script> </div> <script type=text/javascript src=/js/app.js></script> </body> </html> 
