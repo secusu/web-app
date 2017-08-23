@@ -1,6 +1,6 @@
 'use strict';
 
-//Ractive.DEBUG = false;
+Ractive.DEBUG = (window.location.host === 'secu.su') ? false : true;
 
 window.SECU = window.SECU || {};
 
@@ -325,7 +325,7 @@ window.SECU.App = {
             fixTextareaHeight: window.SECU.Helpers.fixTextareaHeight,
 
             attachFile: function(event, type) {
-console.log('AAA');
+
                 if (event && event.original) {
                     event.original.preventDefault();
                 }
@@ -606,7 +606,7 @@ console.log('AAA');
             },
             
             createContainer: function(event) {
-console.log('BBB');
+
                 if (event && event.original) {
                     event.original.preventDefault();
                 }
