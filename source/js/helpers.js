@@ -165,7 +165,7 @@ window.SECU.Helpers = {
 
                     if (files.length && type && path) {
                         ractive.set(path, [event.dataTransfer.files[0]]);
-                        ractive.fire('checkFile', null, type);
+                        ractive.fire('checkFile', type);
                     }
                     
                     break;
@@ -179,7 +179,6 @@ window.SECU.Helpers = {
     },
 
     checkLocation: function() {
-
         var loc = window.location.pathname,
             id = null;
 
@@ -190,7 +189,7 @@ window.SECU.Helpers = {
                 window.SECU.App._data.app.set('chat.form.room', id);
             }
 
-            window.SECU.App._data.app.fire('toggleView', null, 'chat');
+            window.SECU.App._data.app.fire('toggleView', 'chat');
         } else {
             id = window.location.pathname.substring(1);
 

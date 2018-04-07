@@ -267,7 +267,7 @@
                       {{#feed}}
                         {{#sender.indexOf('SYS') > -1}}
                           {{#sender === 'SYS'}}
-                            <strong class="system {{sender === feed[@index-1].sender ? 'stick' : ''}} {{.unread ? 'unread' : ''}}">{{data.text}}</strong>
+                            <strong class="system {{(@index !== 0 && sender === feed[@index-1].sender) ? 'stick' : ''}} {{.unread ? 'unread' : ''}}">{{data.text}}</strong>
                           {{/sender}}
                         {{/sender}}
                         {{#sender.indexOf('SYS') < 0}}
@@ -276,7 +276,7 @@
                               {{sender}}
                             </strong>
                           {{/@index}}
-                          <div class="{{sender === connection.name ? 'self' : 'other'}} {{sender === feed[@index-1].sender ? 'stick' : ''}} {{.unread ? 'unread' : ''}}">
+                          <div class="{{sender === connection.name ? 'self' : 'other'}} {{(@index !== 0 && sender === feed[@index-1].sender) ? 'stick' : ''}} {{.unread ? 'unread' : ''}}">
                             {{#data}}
                               {{#text.length}}
                                 <div class="text">

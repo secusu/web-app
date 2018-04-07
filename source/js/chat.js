@@ -276,7 +276,7 @@ window.SECU.Chat = {
         var app = window.SECU.App._data.app;
 
         if (app.get('show.chat')) {
-            window.SECU.App._data.app.fire('toggleView', null, 'main');
+            window.SECU.App._data.app.fire('toggleView', 'main');
         }
 
         if (app.get('chat.room.connection.key').length) {
