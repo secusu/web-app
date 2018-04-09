@@ -209,14 +209,6 @@
                 </ul>
               </li>
               <li>
-                <strong>Our official bots:</strong>
-                <ul>
-                  <li>
-                    Telegram: <a rel="nofollow me" href="https://telegram.me/the_secu_bot">@the_secu_bot</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
                 <strong>Are you open-source?</strong>
                 <ul>
                   <li>
@@ -547,11 +539,11 @@
                 <p>You are about to load the package <strong>#{{decrypt.hash}}</strong>. It will be removed from our servers afterwards.</p>
                 
                 <button
-                  class="{{decrypt.loaded || formDisabled ? '' : 'button-primary'}} {{formDisabled ? 'processing' : ''}} containerLoadButton"
+                  class="{{decrypt.loaded || decrypt.formDisabled ? '' : 'button-primary'}} {{decrypt.formDisabled ? 'processing' : ''}} containerLoadButton"
                   on-tap="['requestContainer', decrypt.hash]"
                   on-enter="['requestContainer', decrypt.hash]"
                   on-space="['requestContainer', decrypt.hash]"
-                >{{decrypt.loaded ? 'Package has been loaded' : (formDisabled ? 'Loading' : 'Load')}}</button>
+                >{{decrypt.loaded ? 'Package has been loaded' : (decrypt.formDisabled ? 'Loading' : 'Load')}}</button>
               {{/decrypt.formActive}}
 
             </div>

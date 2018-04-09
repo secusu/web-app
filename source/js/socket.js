@@ -58,6 +58,7 @@ window.SECU.Socket = {
 
         data.chat.on('room.create', function (data) {
             if (data.success) {
+                history.replaceState({}, 'Sëcu', '/c/' + data.room);
                 app.set('chat.form.room', data.room);
                 window.SECU.Chat.join(app.get('chat.form'));
             } else {
