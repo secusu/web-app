@@ -686,12 +686,13 @@ window.SECU.App = {
                     return false;
                 }
 
-                var password = this.get('decrypt.form.password');
+                var password = this.get('decrypt.form.password'),
+                    message = this.get('decrypt.form.message');
 
                 this.set('decrypt.formDisabled', true);
                 this.set('decrypt.fileForm.password', password);
 
-                if (this.get('decrypt.form.message').length) {
+                if (message && message.length) {
                     try {
                         this.set('decrypt.message', window.SECU.Crypt.decrypt(this.get('decrypt.form')));
                     } catch(e) {
