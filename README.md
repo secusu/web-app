@@ -1,6 +1,6 @@
 # SЁCU WEB-APP
 
-[![Gitter chat](https://badges.gitter.im/secusu/secusu.svg)](https://gitter.im/secusu/secusu)
+[![Discord](https://img.shields.io/static/v1?logo=discord&label=&message=Discord&color=36393f&style=flat-square)](https://discord.gg/rYkeBjp)
 
 [SЁCU](https://secu.su/) is a web application design to create, store and provide [SËCU API](https://github.com/secusu/secusu) self-destructing data payloads.
 
